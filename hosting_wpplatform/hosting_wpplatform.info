@@ -1,0 +1,11 @@
+name = WP Platforms
+description = Allow Hostmaster to keep track of multiple instances of WordPress.
+package = Hosting
+dependencies[] = hosting
+dependencies[] = hosting_package
+
+; files[] = includes/views/handlers/hosting_wpplatform_handler_field_release.inc
+; files[] = includes/views/handlers/hosting_wpplatform_handler_field_sites.inc
+; files[] = includes/views/handlers/hosting_wpplatform_handler_field_status.inc
+
+core = 7.x

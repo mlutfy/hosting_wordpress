@@ -1,0 +1,124 @@
+<?php
+
+/**
+ * @file
+ * Define database schema and update functions for the hosting_wpsite module.
+ *
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function hosting_wpsite_schema() {
+  $schema['hosting_wpsite'] = array(
+    'fields' => array(
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'client' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'db_server' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'db_name' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'wpplatform' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'profile' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'language' => array(
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => 'en',
+      ),
+      'last_cron' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+      'cron_key' => array(
+        'type' => 'varchar',
+        'not null' => FALSE,
+        'length' => 80,
+        'default' => '',
+      ),
+      'verified' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('vid'),
+  );
+
+  $schema['hosting_wpsite_backups'] = array(
+    'fields' => array(
+      'bid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'wpsite' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'web_server' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'description' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+      ),
+      'filename' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+      ),
+      'size' => array(
+        'type' => 'int',
+        'size' => 'big',
+        'not null' => FALSE,
+      ),
+      'timestamp' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('bid'),
+  );
+
+  return $schema;
+}

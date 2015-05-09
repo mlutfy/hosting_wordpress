@@ -1,0 +1,749 @@
+<?php
+
+/**
+ * @file
+ * Platform node type definition.
+ */
+
+/**
+ * This wpplatform has been deleted.
+ */
+define('HOSTING_WPPLATFORM_DELETED', -2);
+
+/**
+ * This wpplatform has been locked, new sites will not be allowed to use it.
+ */
+define('HOSTING_WPPLATFORM_LOCKED', -1);
+
+/**
+ * This wpplatform has been queued for creation.
+ */
+define('HOSTING_WPPLATFORM_QUEUED', 0);
+
+/**
+ * This wpplatform is created and enabled, sites may be deployed on it.
+ */
+define('HOSTING_WPPLATFORM_ENABLED', 1);
+
+/**
+ * Implements hook_menu().
+ */
+function hosting_wpplatform_menu() {
+  $items = array();
+
+  $items['hosting/wpplatforms/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['hosting/wpplatforms/add'] = array(
+    'title' => 'Add wpplatform',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('node/add/wpplatform'),
+    'access callback' => 'node_access',
+    'access arguments' => array('create', 'wpplatform'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_node_info().
+ */
+function hosting_wpplatform_node_info() {
+  $types["wpplatform"] = array(
+    "type" => 'wpplatform',
+    "name" => 'WP Platform',
+    'base' => 'hosting_wpplatform',
+    "has_title" => TRUE,
+    "title_label" => t('Name'),
+    "description" => 'TEST WP PLATFORM', // FIXME hosting_node_help("wpplatform"),
+    "has_body" => 0,
+    "body_label" => '',
+    "min_word_count" => 0,
+  );
+
+  return $types;
+}
+
+/**
+ * Implements hook_hosting_tasks().
+ */
+function hosting_wpplatform_hosting_tasks() {
+  $tasks = array();
+  $tasks['wpplatform']['verify'] = array(
+    'title' => t('Verify'),
+    'description' => t('Verify that the wpplatform is correctly installed and working.'),
+    'weight' => 10,
+    'provision_save' => TRUE,
+  );
+  $tasks['wpplatform']['delete'] = array(
+    'title' => t('Delete'),
+    'description' => t('Deleting this wpplatform will completely remove it from the hosting system.
+        This process can not be undone. It can not be performed if you have sites currently
+        running on this wpplatform.
+        Are you really sure you want to delete this wpplatform?'),
+    'weight' => 10,
+    'dialog' => TRUE,
+  );
+  $tasks['wpplatform']['lock'] = array(
+    'title' => t('Lock'),
+    'description' => t('Locking this wpplatform will not delete or disable it or its sites, but will
+        prevent any new sites from being created on it. This may be useful when you have sites that
+        cannot be migrated onto a newer wpplatform, but you wish to prevent other users or clients
+        from continuing to provision on this wpplatform. The wpplatform can be unlocked later.
+        Are you really sure you want to lock this wpplatform?'),
+    'weight' => 10,
+  );
+  $tasks['wpplatform']['unlock'] = array(
+    'title' => t('Unlock'),
+    'description' => t('Unlocking this wpplatform will allow sites to be provisioned on it.
+        Are you really sure you want to unlock this wpplatform?'),
+    'weight' => 10,
+  );
+
+  return $tasks;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function hosting_wpplatform_permission() {
+  return array(
+    'administer wpplatforms' => array(
+      'title' => t('administer wpplatforms'),
+    ),
+    'create wpplatform' => array(
+      'title' => t('create wpplatform'),
+    ),
+    'view wpplatform' => array(
+      'title' => t('view wpplatform'),
+    ),
+    'edit wpplatform' => array(
+      'title' => t('edit wpplatform'),
+    ),
+    'delete wpplatform' => array(
+      'title' => t('delete wpplatform'),
+    ),
+    'view locked wpplatforms' => array(
+      'title' => t('view locked wpplatforms'),
+    ),
+    'create sites on locked wpplatforms' => array(
+      'title' => t('create sites on locked wpplatforms'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_node_access().
+ * @todo: switch to node access constants
+ */
+function hosting_wpplatform_node_access($node, $op, $account) {
+  if ($op != 'create' && hosting_feature('client')) {
+    // We rely on hosting_client_node_grants() instead of global configuration.
+    return NULL;
+  }
+
+  switch ($op) {
+    case 'create':
+      return user_access('create wpplatform', $account);
+
+    case 'update':
+      return user_access('edit wpplatform', $account);
+
+    case 'view':
+      return user_access('view wpplatform', $account);
+  }
+}
+
+/**
+ * Callback for wpplatform verify action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpplatform_verify_action($node) {
+  hosting_add_task($node->nid, 'verify');
+}
+
+/**
+ * Callback for wpplatform lock action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpplatform_lock_action($node) {
+  hosting_add_task($node->nid, 'lock');
+}
+
+/**
+ * Callback for wpplatform unlock action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpplatform_unlock_action($node) {
+  hosting_add_task($node->nid, 'unlock');
+}
+
+/**
+ * Callback for wpplatform delete action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpplatform_delete_action($node) {
+  hosting_add_task($node->nid, 'delete');
+}
+
+/**
+ * Helper function to get wpplatforms that haven't been deleted.
+ */
+function _hosting_get_wpplatforms() {
+  $return = array();
+  $result = db_query("SELECT n.nid, n.title
+                      FROM {node} n
+                      LEFT JOIN {hosting_wpplatform} h
+                      ON n.nid = h.nid
+                      WHERE n.type = :type
+                      AND n.status = :nstatus
+                      AND h.status <> :hstatus
+                      ORDER BY n.title
+                     ", array(
+                       ':type' => 'wpplatform',
+                       ':nstatus' => 1, //@todo: remove magic number?
+                       ':hstatus' => HOSTING_WPPLATFORM_DELETED,
+                     )
+                   );
+  while ($wpplatform = $result->fetch()) {
+    $return[$wpplatform->nid] = $wpplatform->title;
+  }
+  return $return;
+}
+
+/**
+ * Helper function to get wpplatforms that haven't been deleted or locked.
+ */
+function _hosting_get_enabled_wpplatforms() {
+  $return = array();
+  $result = db_query("SELECT n.nid, n.title
+                      FROM {node} n
+                      LEFT JOIN {hosting_wpplatform} h
+                      ON n.nid = h.nid
+                      WHERE n.type = :type
+                      AND n.status = :nstatus
+                      AND h.status <> :hstatus
+                      ORDER BY n.title
+                     ", array(
+                       ':type' => 'wpplatform',
+                       ':nstatus' => 1, //@todo: remove magic number?
+                       ':hstatus' => HOSTING_WPPLATFORM_LOCKED,
+                     )
+                   );
+  while ($wpplatform = $result->fetch()) {
+    $return[$wpplatform->nid] = $wpplatform->title;
+  }
+  return $return;
+}
+
+/**
+ * Helper function to get wpplatforms that have been locked.
+ */
+function _hosting_get_locked_wpplatforms() {
+  $return = array();
+  $result = db_query("SELECT n.nid, n.title
+                      FROM {node} n
+                      LEFT JOIN {hosting_wpplatform} h
+                      ON n.nid = h.nid
+                      WHERE n.type = :type
+                      AND n.status = :nstatus
+                      AND h.status = :hstatus
+                      ORDER BY n.title
+                     ", array(
+                       ':type' => 'wpplatform',
+                       ':nstatus' => NODE_PUBLISHED,
+                       ':hstatus' => HOSTING_WPPLATFORM_LOCKED,
+                     )
+                   );
+  while ($wpplatform = $result->fetch()) {
+    $return[$wpplatform->nid] = $wpplatform->title;
+  }
+  return $return;
+}
+
+/**
+ * Helper function to check if a wpplatform is locked.
+ */
+function _hosting_wpplatform_is_locked($node) {
+  if (in_array($node, array_keys(_hosting_get_locked_wpplatforms()))) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Implements hook_form().
+ */
+function hosting_wpplatform_form(&$node) {
+  $type = node_type_get_type($node);
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#required' => TRUE,
+    '#description' => t('Choose a unique descriptive name for your wpplatform. You very likely want this to be something like "Drupal 7.21".'),
+    '#size' => 40,
+    '#default_value' => $node->title,
+    '#maxlength' => 255,
+  );
+
+  // allow edition if the node is in creation, or if wasn't verified correctly
+  // *and* we're not using a makefile. The reason while we don't allow editing
+  // the path if the makefile was specified is that there's the possibility
+  // that the wpplatform path was actually created when the node was saved the
+  // first time and we have cruft lying around to cleanup.
+  if (!isset($node->nid) || (!$node->verified && !isset($node->makefile))) {
+    $form['publish_path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Publish path'),
+      '#required' => TRUE,
+      '#description' => t('The absolute path on the filesystem where the sites will be hosted. This needs to be created manually and initialized before your wpplatform works properly. It also needs to be a unique path not already in use by a wpplatform on any server.<br />For example, run the following shell commands:<pre>%commands</pre>Your publish path is the absolute path to the directory that gets created.<br />Alternatively, you can specify a makefile below, and the wpplatform will be created automatically if the path specified here does not exist.<br />You are still required to enter the absolute path above, as it will be treated as the target directory by the makefile.', array('%commands' => "cd /var/aegir/wpplatforms\ndrush dl drupal\n")),
+      '#size' => 40,
+      '#default_value' => isset($node->publish_path) ? $node->publish_path : NULL,
+      '#maxlength' => 255,
+    );
+  }
+  else {
+    // display it
+    $form['info']['publish_path'] = array(
+      '#type' => 'item',
+      '#title' => t('Publish path'),
+      '#markup' => $node->publish_path,
+    );
+    // send it on form submission
+    $form['publish_path'] = array(
+      '#type' => 'hidden',
+      '#value' => $node->publish_path,
+    );
+  }
+
+  $form['frommakefile'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+    '#title' => t('Deploy from makefile'),
+    '#collapsible' => TRUE,
+    '#description' => t('You may deploy this wpplatform from a makefile.'),
+    '#weight' => -1,
+  );
+
+  $form['frommakefile']['makefile'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Makefile'),
+    '#description' => t('The absolute path on the filesystem or public URL of a makefile that will be used to create the wpplatform in the directory specified above. If the directory already exists, this file will be ignored.'),
+    '#size' => 40,
+    '#default_value' => isset($node->makefile) ? $node->makefile : NULL,
+    '#maxlength' => 255,
+  );
+
+  $form['frommakefile']['make_working_copy'] = array(
+    '#type' => 'radios',
+    '#title' => t('Drush make option'),
+    '#default_value' => isset($node->make_working_copy) ? $node->make_working_copy : 0,
+    '#options' => array(
+      0 => t('Normal - Discards SCM files'),
+      1 => t('Working copy - preserves SCM files'),
+    ),
+  );
+
+  $form['#after_build'][] = 'hosting_wpplatform_form_wpplatform_after_build';
+
+  $servers = hosting_get_servers('http');
+  if (count($servers) > 1) {
+    $form['web_server'] = array(
+      '#type' => 'radios',
+      '#title' => t('Web server'),
+      '#description' => t('The web server the sites will be hosted on.'),
+      '#options' => $servers,
+      '#default_value' => isset($node->web_server) ? $node->web_server : HOSTING_DEFAULT_WEB_SERVER,
+    );
+  }
+  else {
+    reset($servers);
+    $form['web_server'] = array(
+      '#type' => 'hidden',
+      '#value' => key($servers),
+    );
+  }
+
+  foreach (array('verified', 'wpplatform_status') as $extra_attribute) {
+    $form["$extra_attribute"] = array(
+      '#type' => 'value',
+      '#value' => isset($node->$extra_attribute) ? $node->$extra_attribute : NULL,
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function hosting_wpplatform_form_wpplatform_after_build($form) {
+  // @todo: what are the ifs for when we react the same either way?
+  drupal_add_js(drupal_get_path('module', 'hosting_wpplatform') . '/hosting_wpplatform.js');
+  if (isset($form['frommakefile']['makefile']['#attributes']['class'])) {
+    $form['frommakefile']['makefile']['#attributes']['class'][] = ' hosting-wpplatform-working-copy-source';
+  }
+  else {
+    $form['frommakefile']['makefile']['#attributes']['class'][] = ' hosting-wpplatform-working-copy-source';
+  }
+
+  if (isset($form['frommakefile']['make_working_copy']['#attributes']['class'])) {
+    $form['frommakefile']['make_working_copy']['#attributes']['class'][] = ' hosting-wpplatform-working-copy-target';
+  }
+  else {
+    $form['frommakefile']['make_working_copy']['#attributes']['class'][] = ' hosting-wpplatform-working-copy-target';
+  }
+
+  return $form;
+}
+
+/**
+ * Hide the delete button on wpplatform nodes.
+ */
+function hosting_wpplatform_form_alter(&$form, &$form_state, $form_id) {
+  // Remove delete button from wpplatform edit form, unless the wpplatform's already been deleted via the Delete task
+  if ($form_id == 'wpplatform_node_form') {
+    $node = $form['#node'];
+    if (isset($node->wpplatform_status) && $node->wpplatform_status !== HOSTING_WPPLATFORM_DELETED) {
+      $form['actions']['delete']['#type'] = 'hidden';
+    }
+  }
+}
+
+/**
+ * Implements hook_insert().
+ */
+function hosting_wpplatform_insert($node) {
+  if (!isset($node->no_verify)) {
+    hosting_add_task($node->nid, 'verify');
+  }
+  $id = db_insert('hosting_wpplatform')
+    ->fields(array(
+      'vid' => $node->vid,
+      'nid' => $node->nid,
+      'publish_path' => $node->publish_path,
+      'makefile' => isset($node->makefile) ? $node->makefile : (isset($node->frommakefile['makefile']) ? $node->frommakefile['makefile'] : ''),
+      'verified' => isset($node->verified) ? $node->verified : 0,
+      'web_server' => $node->web_server,
+      'status' => isset($node->wpplatform_status) ? $node->wpplatform_status : 0,
+      'make_working_copy' => isset($node->frommakefile['make_working_copy']) ? $node->frommakefile['make_working_copy'] : 0,
+    ))
+    ->execute();
+  if (!isset($node->old_vid)) {
+    hosting_context_register($node->nid, 'wpplatform_' . preg_replace("/[!\W]/", "", $node->title));
+  }
+}
+
+/**
+ * Implements hook_update().
+ *
+ * As an existing node is being updated in the database, we need to do our own
+ * database updates.
+ */
+function hosting_wpplatform_update($node) {
+  // If this is a new node or we're adding a new revision.
+  if (!empty($node->revision)) {
+    hosting_wpplatform_insert($node);
+  }
+  else {
+    if ($node->wpplatform_status == HOSTING_WPPLATFORM_DELETED) {
+      $node->no_verify = TRUE;
+    }
+    db_update('hosting_wpplatform')
+      ->fields(array(
+        'publish_path' => $node->publish_path,
+        'makefile' => isset($node->makefile) ? $node->makefile : (isset($node->frommakefile['makefile']) ? $node->frommakefile['makefile'] : ''),
+        'web_server' => $node->web_server,
+        'verified' => $node->verified,
+        'status' => $node->wpplatform_status,
+        'make_working_copy' => isset($node->frommakefile['make_working_copy']) ? $node->frommakefile['make_working_copy'] : $node->make_working_copy,
+      ))
+      ->condition('nid', $node->nid)
+      ->execute();
+  }
+  if (!isset($node->no_verify)) {
+    hosting_add_task($node->nid, 'verify');
+  }
+}
+
+/**
+ * Implements hook_nodeapi_TYPE_OP().
+ */
+function hosting_nodeapi_wpplatform_delete_revision(&$node) {
+  db_delete('hosting_wpplatform')
+    ->condition('vid', $node->vid)
+    ->execute();
+}
+
+/**
+ * Implements hook_delete().
+ */
+function hosting_wpplatform_delete($node) {
+  db_delete('hosting_wpplatform')
+    ->condition('nid', $node->nid)
+    ->execute();
+  db_delete('hosting_package_instance')
+    ->condition('rid', $node->nid)
+    ->execute();
+
+  hosting_context_delete($node->nid);
+  hosting_task_delete_related_tasks($node->nid);
+  $result = db_query("SELECT distinct nid FROM {hosting_site} WHERE wpplatform = :wpplatform", array(':wpplatform' => $node->nid));
+  while ($nid = $result->fetch()) {
+    node_delete($nid->nid);
+  }
+}
+
+/**
+ * Implements hook_validate().
+ */
+function hosting_wpplatform_validate($node, &$form) {
+  // Make sure the wpplatform name is unique, to avoid context clashes.
+  if ($node->op != t('Delete') && $result = db_query("SELECT n.title AS name FROM {hosting_wpplatform} AS h INNER JOIN {node} AS n ON n.nid = h.nid WHERE n.title = !n.title AND n.nid <> !n.nid AND h.status >= !h.status", array('!n.title' => $node->title, '!n.nid' => $node->nid, '!h.status' => HOSTING_WPPLATFORM_QUEUED))->fetch()) {
+    form_set_error('title', t('Platform name %name is already defined. Platform names must be unique across all servers.', array('%name' => $result->name)));
+  }
+  // Make sure the path is unique. Remote servers can't have the same path to a wpplatform that is in use by another server.
+  if ($node->op != t('Delete') && $result = db_query("SELECT n.title AS name FROM {hosting_wpplatform} AS h INNER JOIN {node} AS n ON n.nid = h.nid WHERE publish_path = !publish_path AND n.nid <> !n.nid AND h.status >= !h.status", array('!publish_path' => hosting_path_normalize($node->publish_path), '!n.nid' => $node->nid, '!h.status' => HOSTING_WPPLATFORM_QUEUED))->fetch()) {
+    form_set_error('publish_path', t('Path is already in use by wpplatform %name. Platform paths must be unique across all servers.', array('%name' => $result->name)));
+  }
+  if (is_null($node->web_server)) {
+    form_set_error('web_server', t('Platform needs to be associated with a webserver. Make sure you have a verified webserver on this Aegir install!'));
+  }
+}
+
+/**
+ * Implements hook_load().
+ */
+function hosting_wpplatform_load($nodes) {
+  foreach ($nodes as $nid => &$node) {
+    $additions = db_query('SELECT publish_path, makefile, verified, web_server, status AS wpplatform_status, make_working_copy FROM {hosting_wpplatform} WHERE vid = :vid', array(':vid' => $node->vid))->fetch();
+    // Avoid PHP 5.4 warning when wpplatform doesn't exist yet.
+    // See: https://drupal.org/node/1940378
+    $additions = $additions ? $additions : new stdClass();
+    $iid = db_query("SELECT iid
+                     FROM {hosting_package_instance} i
+                     LEFT JOIN {hosting_package} p
+                     ON p.nid=i.package_id
+                     WHERE p.package_type = :package_type
+                     AND i.rid = :rid",
+                     array(
+                       ':package_type' => 'wpplatform',
+                       ':rid' => $node->nid,
+                     )
+                   )->fetchField();
+
+    if (empty($node->frommakefile)) {
+      $node->frommakefile = array('makefile' => '', 'make_working_copy' => 0);
+    }
+    if (!empty($additions->makefile)) {
+      $node->frommakefile['makefile'] = $additions->makefile;
+    }
+    if (!empty($additions->make_working_copy)) {
+      $node->frommakefile['make_working_copy'] = $additions->make_working_copy;
+    }
+
+    $additions->release = hosting_package_instance_load($iid);
+    $additions->profiles = hosting_get_profiles($node->nid, 'short_name');
+
+/* TODO
+    if (hosting_feature('client')) {
+      $result = db_query("SELECT cid FROM {hosting_wpplatform_client_access} WHERE pid = :pid", array(':pid' => $node->nid));
+
+      foreach ($result as $record) {
+        $additions->clients[$record->cid] = $record->cid;
+      }
+    }
+*/
+
+    foreach ($additions as $property => &$value) {
+      $node->$property = $value;
+    }
+  }
+}
+
+/**
+ * Menu wildcard loader callback.
+ *
+ * Loads a hosting_wpplatform node.
+ * @see hosting_task_menu()
+ *
+ * @param int $arg
+ *   Node's numeric nid
+ *
+ * @return bool|object
+ */
+function hosting_wpplatform_wildcard_load($arg) {
+  if (!is_numeric($arg)) {
+    return FALSE;
+  }
+  if ($node = node_load($arg)) {
+    if ($node->type == 'wpplatform') {
+      return $node;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_view().
+ */
+function hosting_wpplatform_view($node, $teaser = FALSE, $page = FALSE) {
+
+  $node->content['info'] = array(
+    '#prefix' => '<div id="hosting-wpplatform-info" class="hosting-info-list">',
+    '#suffix' => '</div>',
+  );
+
+  $node->content['info']['verified'] = array(
+    '#type' => 'item',
+    '#title' => t('Verified'),
+    '#markup' => hosting_format_interval($node->verified),
+    '#weight' => -10,
+  );
+
+  $node->content['info']['publish_path'] = array(
+    '#type' => 'item',
+    '#title' => t('Publish path'),
+    '#markup' => filter_xss($node->publish_path),
+    '#weight' => -8,
+  );
+
+  $node->content['info']['web_server'] = array(
+    '#type' => 'item',
+    '#title' => t('Web server'),
+    '#markup' => _hosting_node_link($node->web_server),
+    '#weight' => -7,
+  );
+  $node->content['info']['status'] = array(
+    '#type' => 'item',
+    '#title' => t('Status'),
+    '#markup' => _hosting_wpplatform_status($node->wpplatform_status),
+  );
+
+  if ($node->makefile) {
+    $node->content['info']['makefile'] = array(
+      '#type' => 'item',
+      '#title' => t('Drush makefile'),
+      '#markup' => (preg_match('/^http|^ftp/', $node->makefile)) ? l(t('makefile'), $node->makefile) : filter_xss($node->makefile),
+    );
+  }
+
+  if ($node->release) {
+    $release = sprintf("%s %s", $node->release->title, $node->release->version);
+    $node->content['info']['release'] = array(
+      '#type' => 'item',
+      '#title' => t('Release'),
+      '#markup' => _hosting_node_link($node->release->nid, $release),
+      '#weight' => -6,
+    );
+  }
+
+  // Task list.
+  if ($page && $node->nid) {
+    $node->content['tasks_view'] = array(
+      '#type' => 'item',
+      '#markup' => hosting_task_table($node),
+      '#prefix' => '<div id="hosting-task-list">',
+      '#suffix' => '</div>',
+      '#weight' => 9,
+    );
+    $settings['hostingTaskRefresh'] = array(
+      'nid' => $node->nid,
+      'changed' => $node->changed,
+    );
+    drupal_add_js($settings, array('type' => 'setting', 'scope' => JS_DEFAULT));
+
+    drupal_add_js(drupal_get_path('module', 'hosting_task') . '/hosting_task.js');
+  }
+
+  return $node;
+}
+
+/**
+ * Implements hook_hosting_site_site_list_filters().
+ */
+function hosting_wpplatform_hosting_site_site_list_filters() {
+  return array('wpplatform');
+}
+
+/**
+ * Helper function to map status codes to labels and classes.
+ */
+function _hosting_wpplatform_status_codes() {
+  $codes = array(
+    HOSTING_WPPLATFORM_QUEUED => array(
+      'label' => 'Queued',
+      'class' => 'hosting-queue',
+    ),
+    HOSTING_WPPLATFORM_ENABLED => array(
+      'label' => 'Enabled',
+      'class' => 'hosting-success',
+    ),
+    HOSTING_WPPLATFORM_DELETED => array(
+      'label' => 'Deleted',
+      'class' => 'hosting-error',
+    ),
+    HOSTING_WPPLATFORM_LOCKED => array(
+      'label' => 'Locked',
+      'class' => 'hosting-disable',
+    ),
+  );
+  return $codes;
+}
+
+/**
+ * Return the appropriate status label.
+ */
+function _hosting_wpplatform_status($status) {
+  static $labels;
+  $labels = _hosting_wpplatform_status_codes();
+  return is_object($status) ? $labels[$status->wpplatform_status]['label'] : $labels[$status]['label'];
+}
+
+/**
+ * Implements hook_hosting_summary().
+ */
+function hosting_wpplatform_hosting_summary() {
+  $summary = array();
+  if (user_access('view locked wpplatforms')) {
+    $wpplatforms = _hosting_get_wpplatforms();
+    $summary['wpplatforms'] = theme('item_list', array('items' => array_map('_hosting_node_link', array_keys($wpplatforms)), 'title' => t('Platforms')));
+  }
+  elseif (user_access('view wpplatform')) {
+    $wpplatforms = _hosting_get_enabled_wpplatforms();
+    $summary['wpplatforms'] = theme('item_list', array('items' => array_map('_hosting_node_link', array_keys($wpplatforms)), 'title' => t('Platforms')));
+  }
+  return $summary;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+# [ML] TODO
+# function hosting_wpplatform_views_api() {
+#   return array(
+#     'api' => 3,
+#     'path' => drupal_get_path('module', 'hosting_wpplatform') . '/includes/views',
+#   );
+# }
+
+/**
+ * Define the classes that correspond to the wpplatform status.
+ */
+function _hosting_wpplatform_list_class($status) {
+  static $labels;
+  $labels = _hosting_wpplatform_status_codes();
+  return is_object($status) ? $labels[$status->wpplatform_status]['class'] : $labels[$status]['class'];
+}

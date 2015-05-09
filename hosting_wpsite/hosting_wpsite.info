@@ -1,0 +1,11 @@
+name = Sites
+description = Allow Aegir to manage of hosted WP sites.
+package = Hosting
+dependencies[] = hosting
+dependencies[] = hosting_client
+core = 7.x
+
+; TODO
+; files[] = includes/views/handlers/hosting_site_handler_field_language.inc
+; files[] = includes/views/handlers/hosting_site_handler_field_status.inc
+; files[] = includes/views/plugins/hosting_site_plugin_access.inc

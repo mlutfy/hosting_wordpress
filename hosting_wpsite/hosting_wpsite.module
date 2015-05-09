@@ -1,0 +1,761 @@
+<?php
+/**
+ * @file
+ * Contains hook implementations for Hosting WP site module.
+ */
+
+/**
+ * This site is deleted from the backend.
+ */
+define('HOSTING_WPSITE_DELETED', -2);
+
+/**
+ * This site is disabled.
+ */
+define('HOSTING_WPSITE_DISABLED', -1);
+
+/**
+ * This site is queued for creation.
+ */
+define('HOSTING_WPSITE_QUEUED', 0);
+
+/**
+ * This site is created and enabled in the backend.
+ */
+define('HOSTING_WPSITE_ENABLED', 1);
+
+include_once 'hosting_wpsite.nodeapi.inc';
+include_once 'hosting_wpsite.form.inc';
+# include_once 'hosting_site.backups.inc';
+
+//Conditonally include site quotas
+/* TODO
+if (module_exists('hosting_quota')) {
+  include_once 'hosting_site.quota.inc';
+}
+*/
+
+/**
+ * Implements hook_menu().
+ */
+function hosting_wpsite_menu() {
+  $items = array();
+
+  $items['hosting/wpsites/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['hosting/wpsites/add'] = array(
+    'title' => 'Add WP site',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('node/add/wpsite'),
+    'access callback' => 'node_access',
+    'access arguments' => array('create', 'wpsite'),
+  );
+
+  $items['node/%node/platform-add-wpsite'] = array(
+    'title' => 'Add WP site',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'hosting_wpsite_add_by_platform',
+    'page arguments' => array(1),
+    'access callback' => 'hosting_wpsite_add_by_platform_access',
+    'access arguments' => array(1),
+  );
+
+  $items['hosting/hosting_wpsite_form_check'] = array(
+    'page callback' => '_hosting_wpsite_form_check',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+  );
+
+
+  $items['node/%node/goto_wpsite'] = array(
+    'page callback' => 'hosting_wpsite_goto',
+    'page arguments' => array(1),
+    'access callback' => 'node_access',
+    'access arguments' => array('view', 1),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function hosting_wpsite_theme($existing, $type, $theme, $path) {
+  $items = array();
+
+  $items['hosting_wpsite_profile'] = array(
+    'arguments' => array(
+      'profile' => NULL,
+      'html' => FALSE,
+    ),
+  );
+  $items['hosting_wpsite_goto_link'] = array(
+    'arguments' => array(
+      'title' => NULL,
+      'url' => NULL,
+    ),
+  );
+
+  return $items;
+}
+
+function _hosting_wpsite_form_check() {
+  $platform = NULL;
+  if (isset($_GET['platform'])) {
+    $platform = $_GET['platform'];
+  }
+  drupal_json_output(
+    hosting_wpsite_available_options($_POST, $platform)
+  );
+  exit();
+}
+
+/**
+ * Menu wildcard loader callback.
+ *
+ * Loads a hosting_site node.
+ * @see hosting_task_menu().
+ *
+ * @param arg
+ *    Node's numeric nid
+ *
+ * @return object|bool
+ */
+function hosting_wpsite_wildcard_load($arg) {
+  if (!is_numeric($arg)) {
+    return FALSE;
+  }
+  if ($node = node_load($arg)) {
+    if ($node->type == 'wpsite') {
+      return $node;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Generate a link allowing the user to log into their new site, or simply
+ * go to the site front page if the link has expired.
+ */
+function _hosting_wpsite_goto_link($node) {
+  $cache = cache_get("hosting:wpsite:" . $node->nid . ":login_link");
+  if (user_access('create login-reset task') && $cache && (REQUEST_TIME < $cache->data['expire'])) {
+    $title = t("Log in to !url", array('!url' => $node->title));
+  }
+  else {
+    $title = t("Go to !url", array('!url' => $node->title));
+  }
+  $url = "node/" . $node->nid . "/goto_wpsite";
+  return theme('hosting_wpsite_goto_link', array('title' => $title, 'url' => $url));
+}
+
+/**
+ * Theme function for site link.
+ */
+function theme_hosting_wpsite_goto_link($variables) {
+  $options['attributes']['class'] = 'hosting-goto-wpsite-link';
+  $options['attributes']['target'] = '_blank';
+  return l($variables['title'], $variables['url'], $options);
+}
+
+/**
+ * Menu callback to go to your site.
+ *
+ * This needs to be a callback because the link is only going to work once,
+ * so this will remove the link from the cache and just redirect to the site
+ * not the login page.
+ */
+function hosting_wpsite_goto($node) {
+  $cid = "hosting:wpsite:" . $node->nid . ":login_link";
+  $cache = cache_get($cid);
+  if (user_access('create login-reset task') && is_object($cache) && (REQUEST_TIME < $cache->data['expire'])) {
+    $theurl = $cache->data['link'];
+    cache_clear_all($cid, 'cache');
+  }
+  else {
+    $theurl = _hosting_wpsite_url($node);
+  }
+
+  drupal_goto($theurl);
+  exit();
+}
+
+/**
+ * Retrieve the port the site will be available on, so we can redirect.
+ */
+function hosting_wpsite_get_port($node) {
+  $platform = node_load($node->platform);
+  $server = node_load($platform->web_server);
+  return $server->services['http']->port;
+}
+
+/**
+ * Get site's URL.
+ */
+function _hosting_wpsite_url($node) {
+  $schema = 'http';
+  $port = NULL;
+
+  $url = strtolower(trim($node->title));
+
+  $platform = node_load($node->platform);
+  $server = node_load($platform->web_server);
+
+
+  if ($server->services['http']->has_port()) {
+    $port = $server->services['http']->port;
+    if ($port == 80) {
+      $port = NULL;
+    }
+  }
+
+  /**
+   * This is part of the ssl feature, but is better to implement here.
+   */
+  if (isset($node->ssl_enabled) && ($node->ssl_enabled == 2)) {
+    // this is a bit of a magic number, because we cant rely on the constant being available yet.
+    // 2 == Only SSL is enabled.
+    $schema = 'https';
+
+    if ($server->services['http']->has_port()) {
+      $port = $server->services['http']->ssl_port;
+      if ($port == 443) {
+        $port = NULL;
+      }
+    }
+  }
+
+  if (is_numeric($port)) {
+    return "{$schema}://{$url}:{$port}";
+  }
+
+  return "{$schema}://{$url}";
+}
+
+/**
+ * Implements hook_hosting_tasks().
+ */
+function hosting_wpsite_hosting_tasks() {
+  $tasks = array();
+
+  $tasks['wpsite']['backup'] = array(
+    'title' => t('Backup'),
+    'description' => t('Generate a backup of this site that can be restored to at any time'),
+    'dialog' => TRUE,
+  );
+
+  $tasks['wpsite']['restore'] = array(
+    'title' => t('Restore'),
+    'description' => t('Restore this site to a previous backup. A new backup will be created before this is attempted.'),
+    'dialog' => TRUE,
+  );
+
+  $tasks['wpsite']['verify'] = array(
+    'title' => t('Verify'),
+    'description' => t('Confirm that the site has been correctly installed and regenerate all configuration files to match the hosting front end.'),
+    'provision_save' => TRUE,
+  );
+
+  $tasks['wpsite']['disable'] = array(
+    'title' => t('Disable'),
+    'description' => t('Disabling this site will stop it from being accessible.
+         It can be enabled again later.'),
+    'dialog' => TRUE,
+  );
+  $tasks['wpsite']['enable'] = array(
+    'title' => t('Enable'),
+    'description' => t('Enabling this site will allow it to be accesible again.
+         It may be disabled again if needed.'),
+  );
+  $tasks['wpsite']['delete'] = array(
+    'title' => t('Delete'),
+    'description' => t('Deleting this site will completely remove it from the hosting system,
+        but will keep the last backup available. This process can not be undone.
+        Are you really sure you want to delete this site?'),
+    'dialog' => TRUE,
+  );
+
+  $tasks['wpsite']['login-reset'] = array(
+    'title' => t('Reset password'),
+    'description' => t('Generate a one-time login reset url for this site.'),
+  );
+
+  $tasks['wpsite']['backup-delete'] = array(
+    'title' => t('Delete backups'),
+    'description' => t('Delete one or more backup files of a site.'),
+    'dialog' => TRUE,
+  );
+
+  $tasks['wpsite']['install'] = array(
+    'title' => t('Install'),
+    'description' => t('Install a site'),
+    'hidden' => TRUE,
+    'provision_save' => TRUE,
+  );
+
+  $tasks['wpsite']['import'] = array(
+    'title' => t('Import'),
+    'description' => t('Import an existing site into Aegir'),
+    'hidden' => TRUE,
+    'provision_save' => TRUE,
+  );
+
+  return $tasks;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function hosting_wpsite_permission() {
+  return array(
+    'create wpsite' => array(
+      'title' => t('create WP site'),
+    ),
+    'view wpsite' => array(
+      'title' => t('view WP site'),
+    ),
+    'edit wpsite' => array(
+      'title' => t('edit WP site'),
+    ),
+    'delete wpsite' => array(
+      'title' => t('delete WP site'),
+    ),
+    'administer wpsites' => array(
+      'title' => t('administer WP sites'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function hosting_wpsite_node_access($node, $op, $account) {
+  if ($op != 'create' && hosting_feature('client')) {
+    // we rely on hosting_client_node_grants() instead of global configuration
+    return NULL; //@todo check this return value -> NODE_ACCESS_IGNORE?
+  }
+  if ($op == 'create' && user_access('create WP site', $account)) {
+    return NODE_ACCESS_ALLOW;
+  }
+  if ($op == 'update' && user_access('edit WP site', $account)) {
+    return NODE_ACCESS_ALLOW;
+  }
+  if ($op == 'delete' && user_access('delete WP site', $account)) {
+    return NODE_ACCESS_ALLOW;
+  }
+  if ($op == 'view' && user_access('view WP site', $account)) {
+    return NODE_ACCESS_ALLOW;
+  }
+}
+
+/**
+ * Callback for site backup action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpsite_backup_action($node) {
+  hosting_add_task($node->nid, 'backup');
+}
+
+/**
+ * Callback for site verify action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpsite_verify_action($node) {
+  hosting_add_task($node->nid, 'verify');
+}
+
+/**
+ * Callback for site disable action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpsite_disable_action($node) {
+  hosting_add_task($node->nid, 'disable');
+}
+
+/**
+ * Callback for site enable action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpsite_enable_action($node) {
+  hosting_add_task($node->nid, 'enable');
+}
+/**
+ * Callback for site delete action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpsite_delete_action($node) {
+  hosting_add_task($node->nid, 'delete');
+}
+
+/**
+ * Callback for site login reset action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpsite_op_login_reset($node) {
+  hosting_add_task($node->nid, 'login-reset');
+}
+
+/**
+ * Access callback for Site add by wpplatform.
+ */
+function hosting_wpsite_add_by_platform_access($node) {
+  return $node->type == 'wpplatform' && $node->wpplatform_status == HOSTING_WPPLATFORM_ENABLED && node_access('create', 'wpsite');
+}
+
+/**
+ * Page callback for Site add by platform.
+ */
+function hosting_wpsite_add_by_platform($node) {
+  drupal_goto('node/add/wpsite', array('query' => array('wpplatform' => $node->nid)));
+}
+
+/**
+ * Returns a count of sites.
+ *
+ * This is used by cron and statistics to batch the number of sites that are
+ * processed with each call. It is also used to generate the 'site count' per
+ * platform at /hosting/platforms
+ *
+ * By default it only counts enabled sites.
+ *
+ * Optionally can include an array of site statuses by which to consider in the
+ * count.
+ *
+ * @param $platform
+ *   (optional) A platform nid to only count sites on that specific platform.
+ * @param $statuses
+ *   (optional) An array of site statuses (defined by their constants) by which
+ *   to include such sites in the site count.
+ *
+ * @return
+ *   The number of sites matching the specified criteria.
+ */
+function hosting_wpsite_count($wpplatform = NULL, $statuses = NULL) {
+  if (is_null($statuses)) {
+    $statuses = array(HOSTING_WPSITE_ENABLED);
+  }
+
+  $query = db_select('hosting_site')
+    ->addTag('hosting_wpsite_count')
+    ->fields('hosting_site', array('nid'));
+
+  if (count($statuses)) {
+    $query->condition('status', $statuses);
+  }
+
+  if (!is_null($wpplatform)) {
+    $query->condition('wpplatform', $wpplatform);
+  }
+
+  return $query->countQuery()->execute()->fetchField();
+}
+
+/**
+ * Retrieve sites on a specific wpplatform, with a specific status
+ */
+function hosting_get_wpsites_by_status($wpplatform, $status) {
+  $nodes = array();
+  $result = db_query("SELECT nid FROM {hosting_wpsite} WHERE wpplatform = :wpplatform AND status = :status", array(':wpplatform' => $wpplatform, ':status' => $status));
+  while ($nid = $result->fetch()) {
+    $nodes[$nid->nid] = node_load($nid->nid);
+  }
+
+  return $nodes;
+}
+
+/**
+ * Retrieve a node based on the url
+ */
+function hosting_get_wpsite_by_url($url) {
+  // If the Aliases feature is enabled, try and get the site by its alias too
+  if (hosting_feature('alias')) {
+    $nid = db_query("SELECT n.nid
+                       FROM {node} n
+                       JOIN {hosting_site} h
+                         ON n.nid = h.nid
+                  LEFT JOIN {hosting_wpsite_alias} ha
+                         ON h.vid = ha.vid
+                      WHERE (n.title = :title OR ha.alias = :alias)
+                        AND n.type = :type
+                        AND NOT (h.status = :status)",
+                    array(
+                      ':title' => $url,
+                      ':alias' => $url,
+                      ':type' => 'site',
+                      ':status' => HOSTING_WPSITE_DELETED,
+                    ))->fetchField();
+  }
+  else {
+    $nid = db_query("SELECT n.nid
+                       FROM {node} n
+                       JOIN {hosting_site} h
+                         ON n.nid = h.nid
+                      WHERE n.title = :title
+                        AND n.type = :type
+                        AND NOT (h.status = :status)",
+                    array(
+                      ':title' => $url,
+                      ':type' => 'site',
+                      ':status' => HOSTING_WPSITE_DELETED,
+                    ))->fetchField();
+  }
+  if ($nid) {
+    return node_load($nid);
+  }
+  return FALSE;
+}
+
+/**
+ * Helper function to generate update a site node during import.
+ *
+ * @param $site_id
+ *   The node ID of the existing site node to update.
+ * @param $data
+ *  An associative array of data to add to the site node. Keys should correspond
+ *  to properties on the node object to overwrite.
+ * @param $wpplatform
+ *   The node ID of the wpplatform that the site is deployed on.
+ */
+function hosting_import_wpsite($site_id, $data, $wpplatform) {
+  global $user;
+  $client = node_load(HOSTING_DEFAULT_CLIENT);
+
+  if ($data['client_name']) {
+    $client = hosting_import_client($data['client_name']);
+  }
+
+  $site = node_load($site_id);
+  $site->nid = $site_id;
+  $site->uid = $client->uid;
+  $site->status = 1;
+  $site->site_status = 1;
+  $site->wpplatform = $wpplatform;
+  $site->no_verify = TRUE;
+  $site->verified = REQUEST_TIME;
+  $site->client = $client->nid ? $client->nid : HOSTING_DEFAULT_CLIENT;
+  $site->cron_key = ($data['cron_key']) ? $data['cron_key'] : '';
+
+  $site->aliases = ($data['aliases']) ? $data['aliases'] : array();
+  $site->db_server = ($site->db_server) ? $site->db_server : HOSTING_DEFAULT_DB_SERVER;
+  $site->site_language = $data['language'] ? $data['language'] : 'en';
+
+  // Drupal 6 introduced a language field on nodes
+  unset($data['language']);
+
+
+  $profile = hosting_package_instance_load(array(
+    'i.rid' => $wpplatform,
+    'p.short_name' => $data['profile'],
+  ));
+  if (!$profile) {
+    $profile = hosting_package_instance_load(array(
+      'i.rid' => $wpplatform,
+      'p.short_name' => 'default',
+    ));
+  }
+  $site->profile = $profile->package_id;
+
+  // cast site object to array, will be using various array_* functions on the data.
+  $site = (array) $site;
+
+  // Protect the fields already in the site object.
+  foreach (array_keys($site) as $key) {
+    unset($data[$key]);
+  }
+
+  // Load all the original node fields.
+  $site = array_merge( (array) node_load($site_id), $site);
+
+  // Map the imported fields onto the node object.
+  $site = array_merge($site, $data);
+
+  // Cast back to object.
+  $site = (object) $site;
+  node_save($site);
+}
+
+/**
+ * Define the status types of a site
+ */
+function _hosting_wpsite_status($node) {
+  $status = (is_numeric($node)) ? $node : $node->wpsite_status;
+  $labels = hosting_wpsite_status_codes('label');
+  return $labels[$status];
+}
+
+/**
+ * Define the status type labels and classes.
+ *
+ * @param $type
+ *   The type of status to return ('label' or 'class').
+ *
+ * @return array
+ */
+function hosting_wpsite_status_codes($type = NULL) {
+  static $codes = array(
+    HOSTING_WPSITE_QUEUED => array(
+      'label' => 'Queued',
+      'class' => 'hosting-queue',
+    ),
+    HOSTING_WPSITE_ENABLED => array(
+      'label' => 'Enabled',
+      'class' => 'hosting-success',
+    ),
+    HOSTING_WPSITE_DELETED => array(
+      'label' => 'Deleted',
+      'class' => 'hosting-error',
+    ),
+    HOSTING_WPSITE_DISABLED => array(
+      'label' => 'Disabled',
+      'class' => 'hosting-disable',
+    ),
+  );
+  if (!is_null($type)) {
+    // Return just the $type
+    $return = array();
+    foreach ($codes as $code => $types) {
+      $return[$code] = $types[$type];
+    }
+    return $return;
+  }
+  else {
+    // Return everything
+    return $codes;
+  }
+}
+
+/**
+ * Implements hook_allow_domain().
+ *
+ * Disallow domains already used as any site's title/url, unless the site has
+ * been deleted.
+ *
+ * @see hosting_domain_allowed()
+ */
+function hosting_wpsite_allow_domain($url, $params = array()) {
+  $query = "SELECT COUNT(n.nid) FROM {node} n
+    JOIN {hosting_site} h ON n.nid = h.nid
+    WHERE type = 'site' AND n.title = :title AND h.status <> :status";
+  $args[':title'] = $url;
+  $args[':status'] = HOSTING_WPSITE_DELETED;
+
+  if (isset($params['nid'])) {
+    $query .= " AND n.nid <> :nid";
+    $args[':nid'] = $params['nid'];
+  }
+  $result = !db_query($query, $args)->fetchField();
+  return $result;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function hosting_wpsite_task_status($nid) {
+  return hosting_task_status_output('nid', $nid, 'install');
+}
+
+/**
+ * Define the classes that correspond to the site status.
+ * @see _hosting_wpsite_status()
+ */
+function _hosting_wpsite_list_class($node, $verified = NULL) {
+  $status = (is_numeric($node)) ? $node : $node->site_status;
+  $classes = hosting_wpsite_status_codes('class');
+  if (($status == HOSTING_WPSITE_ENABLED) && ($verified <= 1)) {
+    return 'hosting-warning';
+  }
+
+  return $classes[$status];
+}
+
+/**
+ * Views integration.
+ */
+/* TODO
+function hosting_wpsite_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'hosting_wpsite') . '/includes/views',
+  );
+}
+*/
+
+/**
+ * Theme function for install profile item.
+ */
+function theme_hosting_wpsite_profile($variables) {
+  if ($variables['html']) {
+    return "{$variables['profile']->title} <em>({$variables['profile']->short_name})</em>";
+  }
+  return "{$variables['profile']->title} ({$variables['profile']->short_name})";
+}
+
+/**
+ * Control block visibility.
+ */
+function hosting_wpsite_client_list_block_visibility() {
+  global $user;
+  $node = menu_get_object();
+  $menu_item = menu_get_item();
+  if (!empty($node) && $menu_item['number_parts'] == 2) {
+    return $node->type == 'client' && !user_access('administer clients', $user);
+  }
+  return FALSE;
+}
+
+/**
+ * Control block visibility.
+ */
+function hosting_wpsite_client_admin_block_visibility() {
+  global $user;
+  $node = menu_get_object();
+  $menu_item = menu_get_item();
+  if (!empty($node) && $menu_item['number_parts'] == 2) {
+    return $node->type == 'client' && user_access('administer clients', $user);
+  }
+  return FALSE;
+}
+
+/**
+ * Control block visibility.
+ */
+function hosting_wpsite_profile_block_visibility() {
+  $node = menu_get_object();
+  $menu_item = menu_get_item();
+  if (!empty($node) && $menu_item['number_parts'] == 2) {
+    return $node->type == 'package' && $node->package_type == 'profile';
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_block_view_alter().
+ *
+ * @see: hosting_wpsite_views_pre_build().
+ */
+function hosting_wpsite_block_view_alter(&$data, $block) {
+  if ($block->delta =='hosting_wpsite_list-block_sites') {
+    if ($node = menu_get_object()) {
+      // We only want to show a list of sites on a server with a database,
+      // or on install profile package pages.
+      if (($node->type == 'server' && !array_key_exists('db', $node->services))
+       || ($node->type == 'package' && $node->package_type != 'profile')) {
+        unset($data['subject']);
+        unset($data['content']);
+      }
+    }
+  }
+}

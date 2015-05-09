@@ -1,0 +1,62 @@
+<?php
+/**
+ * @file
+ * Define database schema and update functions for the WP Platforms module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function hosting_wpplatform_schema() {
+  $schema['hosting_wpplatform'] = array(
+    'fields' => array(
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'publish_path' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+      ),
+      'makefile' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+      ),
+      'web_server' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'verified' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'make_working_copy' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('vid'),
+  );
+
+  return $schema;
+}
