@@ -21,7 +21,7 @@ class Provision_Context_wpplatform extends Provision_Context {
     );
   }
 
-  function init_platform() {
+  function init_wpplatform() {
     $this->setProperty('root');
     $this->setProperty('makefile', '');
     $this->setProperty('make_working_copy', FALSE);

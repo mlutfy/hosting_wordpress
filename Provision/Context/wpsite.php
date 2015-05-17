@@ -21,11 +21,38 @@ class Provision_Context_wpsite extends Provision_Context {
     );
   }
 
-  function init_site() {
+  function init() {
+    // FIXME: this should not be necessary?
+    // NB: should be fixed by parent::init();
+    $this->setProperty('type', 'wpsite');
+    $this->setProperty('context_type', 'wpsite');
+
+    parent::init();
+
+    // FIXME I have no idea what I am doing.
+    $this->is_oid('wpplatform');
+    // $this->is_oid('platform');
+  }
+
+  function init_wpsite() {
     $this->setProperty('uri');
 
-     // we need to set the alias root to the platform root, otherwise drush will cause problems.
-    $this->root = $this->wpplatform->root;
+    // FIXME Should not be necessary?
+    $this->setProperty('db_server');
+    $this->setProperty('db_service_type');
+
+    // we need to set the alias root to the platform root, otherwise drush will cause problems.
+    $this->setProperty('wpplatform');
+drush_log('WPPLATFORM: ' . print_r($this->wpplatform, 1), 'ok');
+
+    $this->root = d($this->wpplatform)->root;
+drush_log('WPPLATFORM ROOT: ' . $this->root, 'ok');
+
+    // FIXME: without this, http/db won't work properly?
+    # $platform = new stdClass();
+    # $platform->server = '@server_master';
+
+    // $this->platform = d($this->wpplatform);
 
     // set this because this path is accessed a lot in the code, especially in config files.
     $this->site_path = $this->root . '/sites/' . $this->uri;
