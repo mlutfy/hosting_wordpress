@@ -43,10 +43,8 @@ class Provision_Context_wpsite extends Provision_Context {
 
     // we need to set the alias root to the platform root, otherwise drush will cause problems.
     $this->setProperty('wpplatform');
-drush_log('WPPLATFORM: ' . print_r($this->wpplatform, 1), 'ok');
 
     $this->root = d($this->wpplatform)->root;
-drush_log('WPPLATFORM ROOT: ' . $this->root, 'ok');
 
     // FIXME: without this, http/db won't work properly?
     # $platform = new stdClass();
