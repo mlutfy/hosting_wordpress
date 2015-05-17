@@ -292,7 +292,7 @@ function hosting_wpsite_hosting_tasks() {
     'dialog' => TRUE,
   );
 
-  $tasks['wpsite']['install'] = array(
+  $tasks['wpsite']['wordpress-install'] = array(
     'title' => t('Install'),
     'description' => t('Install a site'),
     'hidden' => TRUE,

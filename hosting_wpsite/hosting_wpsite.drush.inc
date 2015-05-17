@@ -10,13 +10,15 @@
  */
 function hosting_hosting_wpsite_context_options(&$task) {
   $task->context_options['db_server'] = hosting_context_name($task->ref->db_server);
-  $task->context_options['platform'] = hosting_context_name($task->ref->platform);
+  $task->context_options['wpplatform'] = hosting_context_name($task->ref->wpplatform);
 
   $task->context_options['uri'] = strtolower(trim($task->ref->title));
   $task->context_options['language'] = $task->ref->wpsite_language;
 
-  $profile = node_load($task->ref->profile);
-  $task->context_options['profile'] = $profile->short_name;
+  $task->context_options['type'] = $task->ref->type;
+
+  // $profile = node_load($task->ref->profile);
+  // $task->context_options['profile'] = $profile->short_name;
 
   $client = node_load($task->ref->client);
   $user = user_load($task->uid);
@@ -33,11 +35,12 @@ function hosting_wpsite_drush_context_import($context, &$node) {
     $node->wpsite_language = $context->language;
     $node->cron_key = $context->cron_key;
     $node->db_server = hosting_drush_import($context->db_server->name);
-    $node->platform = hosting_drush_import($context->platform->name);
+    $node->wpplatform = hosting_drush_import($context->wpplatform->name);
 
     // TODO: abstract this to remove duplication with import post hooks.
+/* FIXME
     $profile = hosting_package_instance_load(array(
-      'i.rid' => $node->platform,
+      'i.rid' => $node->wpplatform,
       'p.short_name' => $context->profile,
     ));
 
@@ -45,7 +48,7 @@ function hosting_wpsite_drush_context_import($context, &$node) {
       // For D6 to D7 upgrades, try changing default to standard.
       if (!empty($context->profile) && $context->profile == 'default') {
         $profile = hosting_package_instance_load(array(
-          'i.rid' => $node->platform,
+          'i.rid' => $node->wpplatform,
           'p.short_name' => 'standard',
         ));
         if ($profile) {
@@ -53,6 +56,7 @@ function hosting_wpsite_drush_context_import($context, &$node) {
         }
       }
     }
+*/
 
     // Log an error if there is still no profile.
     if (!$profile) {
@@ -146,8 +150,8 @@ function hosting_wpsite_hosting_install_task_rollback($task, $data) {
  */
 function hosting_wpsite_post_hosting_disable_task($task, $data) {
   if ($data['context']['backup_file'] && $data->ref->type == 'wpsite') {
-    $platform = node_load($task->ref->platform);
-    hosting_wpsite_add_backup($task->ref->nid, $platform->web_server, $data['context']['backup_file'], t('Generated before being disabled'), $data['context']['backup_file_size']);
+    $wpplatform = node_load($task->ref->wpplatform);
+    hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being disabled'), $data['context']['backup_file_size']);
   }
   $task->ref->wpsite_status = HOSTING_SITE_DISABLED;
   $task->ref->no_verify = TRUE;
@@ -164,8 +168,8 @@ function hosting_wpsite_post_hosting_disable_task($task, $data) {
  */
 function hosting_wpsite_post_hosting_restore_task($task, $data) {
   if ($data['context']['backup_file'] && $task->ref->type == 'wpsite') {
-    $platform = node_load($task->ref->platform);
-    hosting_wpsite_add_backup($task->ref->nid, $platform->web_server, $data['context']['backup_file'], t('Generated before being restored to a previous version'), $data['context']['backup_file_size']);
+    $wpplatform = node_load($task->ref->wpplatform);
+    hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being restored to a previous version'), $data['context']['backup_file_size']);
   }
 }
 
@@ -205,11 +209,11 @@ function hosting_wpsite_post_hosting_delete_task($task, $data) {
  */
 function hosting_wpsite_post_hosting_backup_task($task, $data) {
   if ($data['context']['backup_file'] && $task->ref->type == 'wpsite') {
-    $platform = node_load($task->ref->platform);
+    $wpplatform = node_load($task->ref->wpplatform);
 
     $desc = $task->task_args['description'];
     $desc = ($desc) ? $desc : t('Generated on request');
-    hosting_wpsite_add_backup($task->ref->nid, $platform->web_server, $data['context']['backup_file'], $desc, $data['context']['backup_file_size']);
+    hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], $desc, $data['context']['backup_file_size']);
   }
 }
 
@@ -218,7 +222,7 @@ function hosting_wpsite_post_hosting_backup_task($task, $data) {
  * Implements hook_post_hosting_import_task().
  */
 function hosting_wpsite_post_hosting_import_task($task, $data) {
-  hosting_import_wpsite($task->ref->nid, $data['context'], $task->ref->platform);
+  hosting_import_wpsite($task->ref->nid, $data['context'], $task->ref->wpplatform);
 
   $task->ref->db_name = $data['self']['db_name'];
   node_save($task->ref);

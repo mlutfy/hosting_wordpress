@@ -500,7 +500,7 @@ function hosting_wpplatform_delete($node) {
 
   hosting_context_delete($node->nid);
   hosting_task_delete_related_tasks($node->nid);
-  $result = db_query("SELECT distinct nid FROM {hosting_site} WHERE wpplatform = :wpplatform", array(':wpplatform' => $node->nid));
+  $result = db_query("SELECT distinct nid FROM {hosting_wpsite} WHERE wpplatform = :wpplatform", array(':wpplatform' => $node->nid));
   while ($nid = $result->fetch()) {
     node_delete($nid->nid);
   }

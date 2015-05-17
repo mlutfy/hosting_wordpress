@@ -21,6 +21,10 @@ function hosting_hosting_wpplatform_context_options(&$task) {
   else {
     $task->context_options['make_working_copy'] = 'null';
   }
+
+  if (empty($task->ref->hosting_name)) {
+    $task->ref->hosting_name = hosting_context_name($task->ref->nid);
+  }
 }
 
 /**

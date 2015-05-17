@@ -407,6 +407,6 @@ function hosting_wpsite_form_alter(&$form, &$form_state, $form_id) {
   }
   if (array_key_exists('views_bulk_operations', $form)) {
     // Add our callback, so we can operate on the fully built form.
-    $form['#after_build'][] = '_hosting_wpsite_collapse_views_fieldset';
+    $form['#after_build'][] = '_hosting_site_collapse_views_fieldset'; // FIXME wpsite?
   }
 }
