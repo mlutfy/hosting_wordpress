@@ -1,7 +1,7 @@
 Provision WordPress
 ===================
 
-EXPERIMENTAL and broken, work in progress.
+EXPERIMENTAL work in progress. Use at your own risk.
 
 See: https://www.drupal.org/node/1044692
 
