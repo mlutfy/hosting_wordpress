@@ -36,5 +36,28 @@ function drush_provision_wordpress_install() {
   d()->service('db')->create_site_database();
   d()->service('http')->create_config('site');
 
+  // FIXME .. this relies on a hack, and surely there are better ways.
+  $_SERVER['db_type'] = drush_get_option('db_type', NULL, 'site');
+  $_SERVER['db_host'] = drush_get_option('db_host', NULL, 'site');
+  $_SERVER['db_port'] = drush_get_option('db_port', NULL, 'site');
+  $_SERVER['db_passwd'] = drush_get_option('db_passwd', NULL, 'site');
+  $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
+  $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
+
+  $GLOBALS['argv'] = array(
+    'wp',
+    '--path=' . d()->root . '/',
+    'core',
+    'install',
+    '--url=' . d()->uri,
+    '--title=' . d()->uri,
+    '--admin_user=admin',
+    '--admin_email=mathieu@bidon.ca', // FIXME
+    '--admin_password=changeme', // FIXME
+  );
+
+  define('WP_CLI_ROOT', '/var/aegir/lib/wp-cli');
+  require_once '/var/aegir/lib/wp-cli/php/wp-cli.php';
+
   drush_log('WordPress: finished drush_provision_wordpress_install', 'ok');
 }
