@@ -5,6 +5,9 @@ EXPERIMENTAL work in progress. Use at your own risk.
 
 See: https://www.drupal.org/node/1044692
 
+Also see the hosting_wordpress module for the front-end:  
+https://github.com/mlutfy/hosting_wordpress
+
 Installation
 ============
 
@@ -58,7 +61,7 @@ Provision Wordpress
 (C) 2015 Mathieu Lutfy <mathieu@symbiotic.coop>
 
 Distributed under the terms of the GNU Affero General public license v3 (AGPL).  
-http://www.gnu.org/licenses/agpl.htmlo
+http://www.gnu.org/licenses/agpl.html
 
 ```
     This program is free software: you can redistribute it and/or modify
