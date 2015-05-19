@@ -59,5 +59,7 @@ function drush_provision_wordpress_install() {
   define('WP_CLI_ROOT', '/var/aegir/lib/wp-cli');
   require_once '/var/aegir/lib/wp-cli/php/wp-cli.php';
 
+  d()->service('http')->restart();
+
   drush_log('WordPress: finished drush_provision_wordpress_install', 'ok');
 }

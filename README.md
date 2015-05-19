@@ -19,7 +19,6 @@ How to test
 - Create a new platform on your filesystem, ex: mkdir /var/aegir/platforms/wordpress-4.2.2/; cd /var/aegir/platforms/wordpress-4.2.2/; wp core download
 - Create a new WP Platform (node/add/wpplatform)
 - Create a new WP Site from there.
-- Manually restart nginx after the install is ready.
 - Access the URL of your new site.
 - NB: I have only tested on nginx so far. There may be rewrites missing for Apache.
 
