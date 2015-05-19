@@ -44,6 +44,8 @@ function drush_provision_wordpress_install() {
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
 
+  $admin_email = drush_get_option('client_email', 'fixme@example.org');
+
   $GLOBALS['argv'] = array(
     'wp',
     '--path=' . d()->root . '/',
@@ -52,7 +54,7 @@ function drush_provision_wordpress_install() {
     '--url=' . d()->uri,
     '--title=' . d()->uri,
     '--admin_user=admin',
-    '--admin_email=mathieu@bidon.ca', // FIXME
+    '--admin_email=' . $admin_email,
     '--admin_password=changeme', // FIXME
   );
 
