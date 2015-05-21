@@ -60,7 +60,7 @@ function hosting_wpsite_drush_context_import($context, &$node) {
 
     // Log an error if there is still no profile.
     if (!$profile) {
-      drush_set_error("HOSTING_SITE_IMPORT_ERROR", dt("Could not find the Profile !profile for Platfrom ID !platform", array('!profile' => $context->profile, '!platform' => $node->platform)));
+      drush_set_error("HOSTING_WPSITE_IMPORT_ERROR", dt("Could not find the Profile !profile for Platfrom ID !platform", array('!profile' => $context->profile, '!platform' => $node->platform)));
     }
     $node->profile = $profile->package_id;
 
@@ -131,7 +131,7 @@ function hosting_wpsite_post_hosting_wordpress_install_task($task, $data) {
  * Implements the hosting_failed_install hook
  */
 function hosting_wpsite_hosting_wordpress_install_task_rollback($task, $data) {
-  // @TODO : we need to check the returned list of errors, not the code.
+  // FIXME: this code was copy-pasted. Do we have an equivalent way to check?
   if (drush_cmp_error('PROVISION_DRUPAL_SITE_INSTALLED')) {
     // Site has already been installed. Try to import instead.
     drush_log(dt("This wpsite appears to be installed already. Generating an import task."));
@@ -139,7 +139,7 @@ function hosting_wpsite_hosting_wordpress_install_task_rollback($task, $data) {
   }
   else {
     $task->ref->no_verify = TRUE;
-    $task->ref->wpsite_status = HOSTING_SITE_DISABLED;
+    $task->ref->wpsite_status = HOSTING_WPSITE_DISABLED;
     node_save($task->ref);
   }
 }
@@ -153,7 +153,7 @@ function hosting_wpsite_post_hosting_wordpress_disable_task($task, $data) {
     $wpplatform = node_load($task->ref->wpplatform);
     hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being disabled'), $data['context']['backup_file_size']);
   }
-  $task->ref->wpsite_status = HOSTING_SITE_DISABLED;
+  $task->ref->wpsite_status = HOSTING_WPSITE_DISABLED;
   $task->ref->no_verify = TRUE;
   node_save($task->ref);
 
@@ -177,7 +177,7 @@ function hosting_wpsite_post_hosting_wordpress_restore_task($task, $data) {
  * Implements hook_hosting_post_enable().
  */
 function hosting_wpsite_post_hosting_wordpress_enable_task($task, $data) {
-  $task->ref->wpsite_status = HOSTING_SITE_ENABLED;
+  $task->ref->wpsite_status = HOSTING_WPSITE_ENABLED;
   $task->ref->no_verify = TRUE;
   node_save($task->ref);
 }
@@ -187,7 +187,7 @@ function hosting_wpsite_post_hosting_wordpress_enable_task($task, $data) {
  */
 function hosting_wpsite_post_hosting_wordpress_delete_task($task, $data) {
   if ($task->ref->type == 'wpsite') {
-    $task->ref->wpsite_status = HOSTING_SITE_DELETED;
+    $task->ref->wpsite_status = HOSTING_WPSITE_DELETED;
     $task->ref->no_verify = TRUE;
     hosting_context_delete($task->ref->nid);
     node_save($task->ref);
@@ -271,7 +271,7 @@ function hosting_wpsite_hosting_import_task_rollback($task, $data) {
   if ($task->ref->type == 'wpsite') {
     $task->ref->no_verify = TRUE;
     $task->ref->verified = 0;
-    $task->ref->wpsite_status = HOSTING_SITE_DISABLED;
+    $task->ref->wpsite_status = HOSTING_WPSITE_DISABLED;
     node_save($task->ref);
   }
 }
