@@ -49,6 +49,18 @@ function drush_provision_wordpress_install() {
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
 
+  // Then we add it in the wpsite context
+  drush_set_option('db_type', $_SERVER['db_type'], 'wpsite');
+  drush_set_option('db_host', $_SERVER['db_host'], 'wpsite');
+  drush_set_option('db_port', $_SERVER['db_port'], 'wpsite');
+  drush_set_option('db_passwd', $_SERVER['db_passwd'], 'wpsite');
+  drush_set_option('db_name', $_SERVER['db_name'], 'wpsite');
+  drush_set_option('db_user', $_SERVER['db_user'], 'wpsite');
+
+  // And now save the wpsite context to disk (drushrc.php).
+  $config = new Provision_Config_Drushrc_wpsite(d()->name);
+  $config->write();
+
   $admin_email = drush_get_option('client_email', 'fixme@example.org');
 
   $GLOBALS['argv'] = array(
