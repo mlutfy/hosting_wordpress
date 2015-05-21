@@ -102,9 +102,7 @@ function drush_hosting_wpsite_pre_hosting_task($task) {
 function hosting_wpsite_post_hosting_wordpress_install_task($task, $data) {
   if ($task->ref->type == 'wpsite') {
     $context = $data['context'];
-    $packages = $context['packages'];
-    hosting_package_sync($packages);
-    hosting_package_instance_sync($task->ref->nid, $task->ref->type, $packages);
+
     $task->ref->wpsite_status = HOSTING_WPSITE_ENABLED;
     $task->ref->no_verify = TRUE;
     $task->ref->verified = REQUEST_TIME;
@@ -114,6 +112,7 @@ function hosting_wpsite_post_hosting_wordpress_install_task($task, $data) {
     }
     node_save($task->ref);
 
+/* FIXME: there is on easy way (API) to get a one-time login link.
     if ($context['login_link']) {
       drush_log($context['login_link']);
       // we need to store the timestamp too because expire only means it can be deleted
@@ -124,6 +123,7 @@ function hosting_wpsite_post_hosting_wordpress_install_task($task, $data) {
       );
       cache_set('hosting:wpsite:' . $task->ref->nid . ':login_link', $cache, 'cache', $cache['expire'] );
     }
+*/
   }
 }
 
