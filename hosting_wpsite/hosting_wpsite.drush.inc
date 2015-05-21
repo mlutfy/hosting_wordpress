@@ -99,13 +99,13 @@ function drush_hosting_wpsite_pre_hosting_task($task) {
 /**
  * implementation of the hosting_post_install hook
  */
-function hosting_wpsite_post_hosting_install_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_install_task($task, $data) {
   if ($task->ref->type == 'wpsite') {
     $context = $data['context'];
     $packages = $context['packages'];
     hosting_package_sync($packages);
     hosting_package_instance_sync($task->ref->nid, $task->ref->type, $packages);
-    $task->ref->wpsite_status = HOSTING_SITE_ENABLED;
+    $task->ref->wpsite_status = HOSTING_WPSITE_ENABLED;
     $task->ref->no_verify = TRUE;
     $task->ref->verified = REQUEST_TIME;
     $task->ref->db_name = $data['self']['db_name'];
@@ -130,7 +130,7 @@ function hosting_wpsite_post_hosting_install_task($task, $data) {
 /**
  * Implements the hosting_failed_install hook
  */
-function hosting_wpsite_hosting_install_task_rollback($task, $data) {
+function hosting_wpsite_hosting_wordpress_install_task_rollback($task, $data) {
   // @TODO : we need to check the returned list of errors, not the code.
   if (drush_cmp_error('PROVISION_DRUPAL_SITE_INSTALLED')) {
     // Site has already been installed. Try to import instead.
@@ -148,7 +148,7 @@ function hosting_wpsite_hosting_install_task_rollback($task, $data) {
  * Implements hook_hosting_post_disable().
  * I am not very fond of the use of bitwise operators with negatives.
  */
-function hosting_wpsite_post_hosting_disable_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_disable_task($task, $data) {
   if ($data['context']['backup_file'] && $data->ref->type == 'wpsite') {
     $wpplatform = node_load($task->ref->wpplatform);
     hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being disabled'), $data['context']['backup_file_size']);
@@ -166,7 +166,7 @@ function hosting_wpsite_post_hosting_disable_task($task, $data) {
  * Implements hook_hosting_post_restore().
  * I am not very fond of the use of bitwise operators with negatives.
  */
-function hosting_wpsite_post_hosting_restore_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_restore_task($task, $data) {
   if ($data['context']['backup_file'] && $task->ref->type == 'wpsite') {
     $wpplatform = node_load($task->ref->wpplatform);
     hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being restored to a previous version'), $data['context']['backup_file_size']);
@@ -176,7 +176,7 @@ function hosting_wpsite_post_hosting_restore_task($task, $data) {
 /**
  * Implements hook_hosting_post_enable().
  */
-function hosting_wpsite_post_hosting_enable_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_enable_task($task, $data) {
   $task->ref->wpsite_status = HOSTING_SITE_ENABLED;
   $task->ref->no_verify = TRUE;
   node_save($task->ref);
@@ -185,7 +185,7 @@ function hosting_wpsite_post_hosting_enable_task($task, $data) {
 /**
  * Implements hook_hosting_post_DELETE().
  */
-function hosting_wpsite_post_hosting_delete_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_delete_task($task, $data) {
   if ($task->ref->type == 'wpsite') {
     $task->ref->wpsite_status = HOSTING_SITE_DELETED;
     $task->ref->no_verify = TRUE;
@@ -207,7 +207,7 @@ function hosting_wpsite_post_hosting_delete_task($task, $data) {
  * Adds the data file that was saved to the wpsite backup history.
  * This is needed to be able to restore.
  */
-function hosting_wpsite_post_hosting_backup_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_backup_task($task, $data) {
   if ($data['context']['backup_file'] && $task->ref->type == 'wpsite') {
     $wpplatform = node_load($task->ref->wpplatform);
 
@@ -221,7 +221,7 @@ function hosting_wpsite_post_hosting_backup_task($task, $data) {
 /**
  * Implements hook_post_hosting_import_task().
  */
-function hosting_wpsite_post_hosting_import_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_import_task($task, $data) {
   hosting_import_wpsite($task->ref->nid, $data['context'], $task->ref->wpplatform);
 
   $task->ref->db_name = $data['self']['db_name'];
@@ -236,7 +236,7 @@ function hosting_wpsite_post_hosting_import_task($task, $data) {
 /**
  * Implements hook_post_hosting_verify_task().
  */
-function hosting_wpsite_post_hosting_verify_task($task, $data) {
+function hosting_wpsite_post_hosting_wordpress_verify_task($task, $data) {
   if ($task->ref->type == 'wpsite') {
     $task->ref->verified = REQUEST_TIME;
     $task->ref->no_verify = TRUE;
@@ -247,9 +247,9 @@ function hosting_wpsite_post_hosting_verify_task($task, $data) {
     node_save($task->ref);
 
     $context = $data['context'];
-    $packages = $context['packages'];
-    hosting_package_sync($packages);
-    hosting_package_instance_sync($task->ref->nid, $task->ref->type, $packages);
+    // $packages = $context['packages'];
+    // hosting_package_sync($packages);
+    // hosting_package_instance_sync($task->ref->nid, $task->ref->type, $packages);
   }
 }
 

@@ -240,56 +240,63 @@ function _hosting_wpsite_url($node) {
 
 /**
  * Implements hook_hosting_tasks().
+ *
+ * TODO: currently no way to reset a password (login-reset), because WP
+ * doesn't have an API for the one time link.
  */
 function hosting_wpsite_hosting_tasks() {
   $tasks = array();
 
-  $tasks['wpsite']['backup'] = array(
+  $tasks['wpsite']['wordpress-backup'] = array(
     'title' => t('Backup'),
     'description' => t('Generate a backup of this site that can be restored to at any time'),
     'dialog' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
-  $tasks['wpsite']['restore'] = array(
+  $tasks['wpsite']['wordpress-restore'] = array(
     'title' => t('Restore'),
     'description' => t('Restore this site to a previous backup. A new backup will be created before this is attempted.'),
     'dialog' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
-  $tasks['wpsite']['verify'] = array(
+  $tasks['wpsite']['wordpress-verify'] = array(
     'title' => t('Verify'),
     'description' => t('Confirm that the site has been correctly installed and regenerate all configuration files to match the hosting front end.'),
     'provision_save' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
-  $tasks['wpsite']['disable'] = array(
+  $tasks['wpsite']['wordpress-disable'] = array(
     'title' => t('Disable'),
     'description' => t('Disabling this site will stop it from being accessible.
          It can be enabled again later.'),
     'dialog' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
-  $tasks['wpsite']['enable'] = array(
+
+  $tasks['wpsite']['wordpress-enable'] = array(
     'title' => t('Enable'),
     'description' => t('Enabling this site will allow it to be accesible again.
          It may be disabled again if needed.'),
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
-  $tasks['wpsite']['delete'] = array(
+
+  $tasks['wpsite']['wordpress-delete'] = array(
     'title' => t('Delete'),
     'description' => t('Deleting this site will completely remove it from the hosting system,
         but will keep the last backup available. This process can not be undone.
         Are you really sure you want to delete this site?'),
     'dialog' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
-  $tasks['wpsite']['login-reset'] = array(
-    'title' => t('Reset password'),
-    'description' => t('Generate a one-time login reset url for this site.'),
-  );
-
-  $tasks['wpsite']['backup-delete'] = array(
+  $tasks['wpsite']['wordpress-backup-delete'] = array(
     'title' => t('Delete backups'),
     'description' => t('Delete one or more backup files of a site.'),
     'dialog' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
   $tasks['wpsite']['wordpress-install'] = array(
@@ -297,13 +304,15 @@ function hosting_wpsite_hosting_tasks() {
     'description' => t('Install a site'),
     'hidden' => TRUE,
     'provision_save' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
-  $tasks['wpsite']['import'] = array(
+  $tasks['wpsite']['wordpress-import'] = array(
     'title' => t('Import'),
     'description' => t('Import an existing site into Aegir'),
     'hidden' => TRUE,
     'provision_save' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
   return $tasks;
@@ -328,6 +337,33 @@ function hosting_wpsite_permission() {
     ),
     'administer wpsites' => array(
       'title' => t('administer WP sites'),
+    ),
+    'create wordpress-backup task' => array(
+      'title' => t('create wordpress-backup task'),
+    ),
+    'create wordpress-restore task' => array(
+      'title' => t('create wordpress-restore task'),
+    ),
+    'create wordpress-disable task' => array(
+      'title' => t('create wordpress-disable task'),
+    ),
+    'create wordpress-enable task' => array(
+      'title' => t('create wordpress-enable task'),
+    ),
+    'create wordpress-delete task' => array(
+      'title' => t('create wordpress-delete task'),
+    ),
+    'create wordpress-verify task' => array(
+      'title' => t('create wordpress-verify task'),
+    ),
+    'create wordpress-lock task' => array(
+      'title' => t('create wordpress-lock task'),
+    ),
+    'create wordpress-unlock task' => array(
+      'title' => t('create wordpress-unlock task'),
+    ),
+    'create wordpress-backup-delete task' => array(
+      'title' => t('create wordpress-backup-delete task'),
     ),
   );
 }
@@ -540,7 +576,7 @@ function hosting_import_wpsite($site_id, $data, $wpplatform) {
   $site->nid = $site_id;
   $site->uid = $client->uid;
   $site->status = 1;
-  $site->site_status = 1;
+  $site->wpsite_status = 1;
   $site->wpplatform = $wpplatform;
   $site->no_verify = TRUE;
   $site->verified = REQUEST_TIME;
@@ -672,7 +708,7 @@ function hosting_wpsite_task_status($nid) {
  * @see _hosting_wpsite_status()
  */
 function _hosting_wpsite_list_class($node, $verified = NULL) {
-  $status = (is_numeric($node)) ? $node : $node->site_status;
+  $status = (is_numeric($node)) ? $node : $node->wpsite_status;
   $classes = hosting_wpsite_status_codes('class');
   if (($status == HOSTING_WPSITE_ENABLED) && ($verified <= 1)) {
     return 'hosting-warning';
@@ -758,4 +794,41 @@ function hosting_wpsite_block_view_alter(&$data, $block) {
       }
     }
   }
+}
+
+/**
+ *
+ */
+function hosting_wpsite_task_menu_access($node, $task) {
+  if ($node->type == 'wpsite') {
+    if (user_access("create " . $task . " task")) {
+      if (hosting_task_outstanding($node->nid, 'delete') || ($node->wpsite_status == HOSTING_WPSITE_DELETED)) {
+        return FALSE;
+      }
+      if (($task == 'wordpress-login-reset') && ($node->wpsite_status != HOSTING_SITE_ENABLED)) {
+        return FALSE;
+      }
+
+      $site_enabled = (hosting_task_outstanding($node->nid, 'enable') || ($node->wpsite_status == HOSTING_WPSITE_ENABLED));
+      $deletable = ($task == "wordpress-delete");
+      $enabable = ($task == "wordpress-enable");
+      $delete_or_enable = ($deletable || $enabable);
+
+      // If the site is not enabled, we can either delete it, or enable it again
+      if (!$site_enabled) {
+        return ($delete_or_enable);
+      }
+      else {
+        // Site is enabled
+        return (
+                 // If we can just delete a site without disabling, allow that
+                 (!variable_get('hosting_require_disable_before_delete', TRUE)) && $deletable
+                 // Otherwise we must disable it first, hide the delete task and the enable task as well
+                 || !$delete_or_enable
+               );
+      }
+    }
+  }
+
+  return FALSE;
 }
