@@ -2,6 +2,10 @@
 
 /**
  * Implements hook_provision_verify().
+ *
+ * NB: for wpsite, we implement instead a wordpress-verify task,
+ * because verify calls things that do too many Drupal assumptions.
+ * We should probably also call it for the wpplatform.
  */
 function drush_provision_wordpress_provision_verify($url = NULL) {
   if (d()->type == 'wpplatform') {
@@ -15,20 +19,9 @@ function drush_provision_wordpress_provision_verify($url = NULL) {
     d()->service_subscribe('http', '@server_master');
     d()->service_subscribe('wpplatform', d()->name);
 
-    // This causes PHP to segfault:
-    // d()->service('wpplatform')->init_wpplatform();
-    // d()->service('wpplatform')->create_config('wpplatform');
-
+    // Writes the wp-config.php file in the platform root.
     $config = new Provision_Config_wpplatform(d()->name);
     $config->write();
-  }
-  elseif (d()->type == 'wpsite') {
-    d()->service_subscribe('server', '@server_master');
-    d()->service_subscribe('http', '@server_master');
-    d()->service_subscribe('wpplatform', d()->wpplatform);
-    d()->service_subscribe('wpsite', d()->name);
-
-    d()->service('http')->create_config('site');
   }
 }
 

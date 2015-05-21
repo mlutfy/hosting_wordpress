@@ -61,6 +61,10 @@ function provision_wordpress_drush_command() {
     'description' => 'Install WordPress.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
+  $items['provision-wordpress-verify'] = array(
+    'description' => 'Verify WordPress.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
 
   return $items;
 }
