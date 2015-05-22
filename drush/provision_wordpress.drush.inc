@@ -35,6 +35,8 @@ function provision_wordpress_provision_register_autoload() {
     $loaded = TRUE;
     $list = drush_commandfile_list();
     $provision_dir = dirname($list['provision']);
+    // TODO: FIXME
+    if (empty($provision_dir)) { $provision_dir = '/var/aegir/.drush/provision';}
     include_once($provision_dir . '/provision.inc');
     include_once($provision_dir . '/provision.service.inc');
     provision_autoload_register_prefix('Provision_', dirname(__FILE__));
