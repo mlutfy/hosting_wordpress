@@ -7,14 +7,14 @@
 /**
  * Implements hook_hosting_feature().
  */
-function hosting_site_hosting_feature() {
-  $features['site'] = array(
-    'title' => t('Site administration'),
+function hosting_wpsite_hosting_feature() {
+  $features['wpsite'] = array(
+    'title' => t('Wordpress site administration'),
     'description' => t('Create and manage sites.'),
-    'status' => HOSTING_FEATURE_REQUIRED,
-    'module' => 'hosting_site',
+    'status' => HOSTING_FEATURE_DISABLED,
+    'module' => 'hosting_wpsite',
     'node' => 'site',
-    'group' => 'required',
+    'group' => 'experimental',
     'role_permissions' => array(
       'aegir platform manager' => array(
         'administer sites',
