@@ -3,6 +3,7 @@ description = Allow Aegir to manage of hosted WP sites.
 package = Hosting
 dependencies[] = hosting
 dependencies[] = hosting_client
+dependencies[] = hosting_wpplatform
 core = 7.x
 
 ; TODO
