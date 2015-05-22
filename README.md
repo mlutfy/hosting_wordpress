@@ -9,7 +9,6 @@ https://github.com/mlutfy/provision_wordpress
 Installation
 ============
 
-- Copy the provision_wordpress module in your ~/.drush/ directory.
 - Copy and enable the hosting_wordpress module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory.
 - See the README.md from provision_wordpress for more information.
 
@@ -21,8 +20,8 @@ This module is not currently supported. Feel free to send patches using the issu
 Copyright and license
 =====================
 
-Provision Wordpress  
+Provision Wordpress
 (C) 2015 Mathieu Lutfy <mathieu@symbiotic.coop>
 
-Distributed under the terms of the GNU Affero General public license v3 (AGPL).  
+Distributed under the terms of the GNU Affero General public license v3 (AGPL).
 http://www.gnu.org/licenses/agpl.htmlo

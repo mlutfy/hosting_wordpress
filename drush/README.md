@@ -11,9 +11,8 @@ https://github.com/mlutfy/hosting_wordpress
 Installation
 ============
 
-- Copy the provision_wordpress module in your ~/.drush/ directory.
 - Copy and enable the hosting_wordpress module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory.
-- Apply the 3 patches below (this will probably break install/verify of Drupal sites)
+- Apply the 3 patches included in the patches directory (this will probably break install/verify of Drupal sites)
 - Install wp-cli in ~/lib/wp-cli.phar and symlink it as ~/bin/wp (FIXME: use ~/.composer ?)
 
 How to test
@@ -78,32 +77,3 @@ http://www.gnu.org/licenses/agpl.html
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ```
 
----------------
-
-Patch on wp-cli:
-
-./php/wp-settings-cli.php
-
-- Utils\maybe_require( '3.5-alpha-22024', ABSPATH . WPINC . '/class-wp-embed.php' );
-+ require( ABSPATH . WPINC . '/class-wp-embed.php' );
-
-Patches on core that need a better fix:
-
-- provision/http/Provision/Service/http/public.php
-
-```
-  function grant_server_list() {
-    return array(
-      $this->server,
-      $this->context->wpplatform->server, // [ML] PATCH WP
-    );
-  }
-```
-
-- /var/aegir/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/hosting.module:
-
-```
-function hosting_context_node_types() {
-  return array('site', 'platform', 'server', 'wpplatform', 'wpsite');
-}
-```
