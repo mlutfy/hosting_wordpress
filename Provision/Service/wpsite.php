@@ -31,7 +31,7 @@ class Provision_Service_wpsite extends Provision_Service {
     $config = new Provision_Config_Drushrc_wpsite($context->name);
     $filename = $config->filename();
 
-    if ($filename) {
+    if ($filename && file_exists($file_exists)) {
       drush_log(dt('WordPress: loading !file', array('!file' => $filename)));
       include($filename);
     }
