@@ -79,18 +79,23 @@ http://www.gnu.org/licenses/agpl.html
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ```
 
----------------
+PATCHES
+=======
 
-Patch on wp-cli:
+Patch on wp-cli
+---------------
 
 ./php/wp-settings-cli.php
 
+```
 - Utils\maybe_require( '3.5-alpha-22024', ABSPATH . WPINC . '/class-wp-embed.php' );
 + require( ABSPATH . WPINC . '/class-wp-embed.php' );
+```
 
 ==> same for revision.php and post-formats.php. Only causes warnings, but annoying.
 
-Patches on Aegir core that need a better fix:
+Patches on Aegir core
+---------------------
 
 - provision/http/Provision/Service/http/public.php
 
