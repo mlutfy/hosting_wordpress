@@ -10,18 +10,18 @@ class Provision_Service_wpplatform extends Provision_Service {
     // FIXME: this isn't called, because we define the service as wpplatform=>NULL
     // in hook_provision_services().. but if we define a 'default' service, we get:
     // Fatal error: Call to a member function setContext() on null in /usr/share/drush/commands/provision/Provision/Context/server.php on line 119
-    drush_log('WordPress: wpplatform service init_wpplatform', 'ok');
+    drush_log('WordPress: service init_wpplatform');
     $this->configs['wpplatform'] = array('Provision_Config_wpplatform');
   }
 
   function verify_wpplatform_cmd() {
-    drush_log('WordPress: wpplatform service verify_wpplatform_cmd', 'ok');
+    drush_log('WordPress: service verify_wpplatform_cmd');
     $this->create_config($this->context->type);
     $this->parse_configs();
   }
 
   static function subscribe_wpplatform($context) {
-    drush_log('WordPress: wpplatform subscribe_wpplatform', 'ok');
+    drush_log('WordPress: service subscribe_wpplatform');
     $context->is_oid('wpplatform');
 
     // Copied from provision/http/Provision/Service/http.php

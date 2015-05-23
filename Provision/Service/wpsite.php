@@ -6,17 +6,8 @@
 class Provision_Service_wpsite extends Provision_Service {
   public $service = 'wpsite';
 
-  /**
-   *
-   */
-  static function subscribe_site($context) {
-    // FIXME: not necessary?
-    // drush_log('SERVICE SITE CONTEXT', 'ok');
-    // $context->service_subscribe('db', $context->db_server->name);
-  }
-
   static function subscribe_wpsite($context) {
-    drush_log('SERVICE WPSITE CONTEXT', 'ok');
+    drush_log('WordPress: service subscribe_wpsite');
     $context->is_oid('wpsite');
 
     // Copied from provision/http/Provision/Service/http.php
