@@ -34,7 +34,6 @@ TODO and known bugs
 
 * Define WP_CONTENT_DIR in wp-config.php to separate content.
 * Can't run 'verify' on the platform (workaround: edit the platform node and re-save).
-* Site 'verify' loses the database credentials in the vhost config.
 * CiviCRM support? https://github.com/andy-walker/wp-cli-civicrm
 
 How it works
