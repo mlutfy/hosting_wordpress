@@ -20,7 +20,9 @@ require_once(dirname(__FILE__) . '/verify.provision.inc');
  */
 function provision_wordpress_drush_init() {
   // Register our service classes for autoloading.
-  // FIXME (see below) provision_wordpress_provision_register_autoload();
+  // FIXME This seems to work better now, but if there are issues,
+  // comment this call, and uncomment the other global call.
+  provision_wordpress_provision_register_autoload();
 }
 
 /**
@@ -35,15 +37,14 @@ function provision_wordpress_provision_register_autoload() {
     $loaded = TRUE;
     $list = drush_commandfile_list();
     $provision_dir = dirname($list['provision']);
-    include_once($provision_dir . '/provision.inc');
-    include_once($provision_dir . '/provision.service.inc');
     provision_autoload_register_prefix('Provision_', dirname(__FILE__));
   }
 }
 
 // FIXME: this needs to run very early in the bootstrap, otherwise:
 // PHP Fatal error:  Class 'Provision_Context_wpplatform' not found in /usr/share/drush/commands/provision/provision.context.inc on line 127
-provision_wordpress_provision_register_autoload();
+// UPDATE: this seems to be fixed now, but no idea what fixed it.
+# provision_wordpress_provision_register_autoload();
 
 /**
  * Implements hook_provision_services().
