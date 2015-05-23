@@ -20,6 +20,21 @@ class Provision_Service_wpsite extends Provision_Service {
     $context->setProperty('db_server', '@server_master');
     $context->is_oid('db_server');
     $context->service_subscribe('db', $context->db_server->name);
+
+    // Drushrc needs this to find the drushrc.php file
+    $context->setProperty('site_path');
+
+    // Load the drushrc.
+    // Since wpsite is not a valid drush context, we need to do it manually.
+    // This will load variables in $_SERVER.
+    // We do not bother with $options for now, but we probably should?
+    $config = new Provision_Config_Drushrc_wpsite($context->name);
+    $filename = $config->filename();
+
+    if ($filename) {
+      drush_log(dt('WordPress: loading !file', array('!file' => $filename)));
+      include($filename);
+    }
   }
 
   static function subscribe_wpplatform($context) {
