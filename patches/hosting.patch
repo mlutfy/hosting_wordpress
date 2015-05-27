@@ -1,0 +1,13 @@
+diff --git a/hosting.module b/hosting.module
+index 784bfdc..39ed1cc 100644
+--- a/hosting.module
++++ b/hosting.module
+@@ -1182,7 +1182,7 @@ function hosting_context_nid($alias) {
+  * Define the node types that have associated provision contexts.
+  */
+ function hosting_context_node_types() {
+-  return array('site', 'platform', 'server');
++  return array('site', 'platform', 'server', 'wpplatform', 'wpsite');
+ }
+ 
+ /**

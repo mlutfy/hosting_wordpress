@@ -17,7 +17,9 @@ Installation
 - Install wp-cli in ~/lib/wp-cli/ (FIXME: use ~/.composer ?)
 - Symlink wp-cli.php as ~/bin/wp, ex: "ln -s /var/aegir/lib/wp-cli/bin/wp /var/aegir/bin/wp"
 - You will probably want to add /var/aegir/bin/ in your $PATH, ex: export PATH=$PATH:/var/aegir/bin
-- Apply the 3 patches below (this will probably break install/verify of Drupal sites)
+- Apply the 3 patches included in the patches directory (this may break install/verify of Drupal sites)
+
+NB: 'provision' is usually located in /usr/share/drush/commands/, and 'hosting' is in ~/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/.
 
 How to test
 ===========
@@ -52,7 +54,16 @@ How it works
 Support
 =======
 
-This module is not currently supported. Feel free to send patches using the issue queue.
+This module is not currently supported. Feel free to send patches using the issue queue on github.
+
+Want to help make this happen? Participate to our crowd-funding campaign:  
+https://crm.symbiotic.coop/civicrm/contribute/transact?id=2
+
+Commercial support is available through Coop SymbioTIC:  
+https://www.symbiotic.coop
+
+Or contact one of the Aegir service providers:  
+https://www.drupal.org/project/hosting
 
 Copyright and license
 =====================
@@ -76,41 +87,4 @@ http://www.gnu.org/licenses/agpl.html
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-```
-
-PATCHES
-=======
-
-Patch on wp-cli
----------------
-
-./php/wp-settings-cli.php
-
-```
-- Utils\maybe_require( '3.5-alpha-22024', ABSPATH . WPINC . '/class-wp-embed.php' );
-+ require( ABSPATH . WPINC . '/class-wp-embed.php' );
-```
-
-==> same for revision.php and post-formats.php. Only causes warnings, but annoying.
-
-Patches on Aegir core
----------------------
-
-- provision/http/Provision/Service/http/public.php
-
-```
-  function grant_server_list() {
-    return array(
-      $this->server,
-      $this->context->wpplatform->server, // [ML] PATCH WP
-    );
-  }
-```
-
-- /var/aegir/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/hosting.module:
-
-```
-function hosting_context_node_types() {
-  return array('site', 'platform', 'server', 'wpplatform', 'wpsite');
-}
 ```
