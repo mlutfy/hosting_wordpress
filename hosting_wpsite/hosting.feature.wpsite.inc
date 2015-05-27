@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Expose the site feature to hostmaster.
+ * Expose the wpsite feature to hostmaster.
  */
 
 /**
@@ -10,30 +10,29 @@
 function hosting_wpsite_hosting_feature() {
   $features['wpsite'] = array(
     'title' => t('Wordpress site administration'),
-    'description' => t('Create and manage sites.'),
+    'description' => t('Create and manage WordPress sites.'),
     'status' => HOSTING_FEATURE_DISABLED,
     'module' => 'hosting_wpsite',
-    'node' => 'site',
+    'node' => 'wpsite',
     'group' => 'experimental',
     'role_permissions' => array(
       'aegir platform manager' => array(
-        'administer sites',
-        'create site',
-        'delete site',
-        'edit site',
-        'view site',
+        'administer wpsites',
+        'create wpsite',
+        'delete wpsite',
+        'edit wpsite',
+        'view wpsite',
       ),
       'aegir account manager' => array(
-        'view site',
+        'view wpsite',
       ),
       'aegir client' => array(
-        'create site',
-        'delete site',
-        'view site',
-        'edit site',
+        'create wpsite',
+        'delete wpsite',
+        'view wpsite',
+        'edit wpsite',
       ),
     ),
-
   );
   return $features;
 }
