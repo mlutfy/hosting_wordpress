@@ -32,6 +32,11 @@ function drush_provision_wordpress_provision_verify($url = NULL) {
 function provision_wordpress_provision_apache_vhost_config($uri, $data) {
   // FIXME ?
   drush_log('WordPress: hello from provision_wordpress_provision_apache_vhost_config', 'ok');
+
+  # TODO
+  # $site_path = d()->site_path;
+  # fastcgi_param wp_content_dir {$site_path}/wp-content/;
+
   return '';
 }
 
@@ -46,7 +51,11 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
   drush_log('WordPress: hello from provision_wordpress_provision_nginx_vhost_config', 'ok');
 
   // FIXME: Quick & dirty confs. There is probably a better way.
+  $site_path = d()->site_path;
+
   $conf = <<<EOF
+    fastcgi_param wp_content_dir {$site_path}/wp-content/;
+
     ###
     ### Allow some known php files.
     ###
@@ -70,7 +79,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
       try_files    \$uri =404;
       fastcgi_pass unix:/var/run/php5-fpm.sock;
     }
-    location ~ /wp-(.*).php$ {
+    location ~ /wp-(.*).php\$ {
       tcp_nopush   off;
       keepalive_requests 0;
       access_log   on;
@@ -79,6 +88,9 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
       }
       try_files    \$uri =404;
       fastcgi_pass unix:/var/run/php5-fpm.sock;
+    }
+    location ~ ^/wp-content/uploads/(.*)\$ {
+      try_files /sites/\$main_site_name/wp-content/uploads/\$1 =404;
     }
 
 EOF;

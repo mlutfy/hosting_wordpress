@@ -38,6 +38,9 @@ define('DB_PASSWORD', $_SERVER['db_passwd']);
 /** MySQL hostname */
 define('DB_HOST', $_SERVER['db_host']);
 
+/** Content directory */
+define('WP_CONTENT_DIR', $_SERVER['wp_content_dir']);
+
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8');
 

@@ -33,6 +33,9 @@ function drush_provision_wordpress_verify() {
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
 
+  // Directory permissions
+  provision_wordpress_setup_directories();
+
   d()->service('http')->restart();
 
   drush_log('WordPress: finished drush_provision_wordpress_verify', 'ok');

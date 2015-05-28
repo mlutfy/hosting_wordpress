@@ -6,8 +6,7 @@
  *   the appropriate files to handle install, verify, &c.
  */
 
-# No need for this yet, but will probably be necessary later.
-# require_once('provision_wordpress.inc');
+require_once('provision_wordpress.inc');
 
 # require_once(dirname(__FILE__) . '/deploy.provision.inc');
 # [done] require_once(dirname(__FILE__) . '/install.provision.inc');

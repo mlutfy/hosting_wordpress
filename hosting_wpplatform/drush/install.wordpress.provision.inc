@@ -49,6 +49,8 @@ function drush_provision_wordpress_install() {
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
 
+  $_SERVER['wp_content_dir'] = d()->site_path . '/wp-content';
+
   // Then we add it in the wpsite context
   drush_set_option('db_type', $_SERVER['db_type'], 'wpsite');
   drush_set_option('db_host', $_SERVER['db_host'], 'wpsite');
@@ -61,6 +63,10 @@ function drush_provision_wordpress_install() {
   $config = new Provision_Config_Drushrc_wpsite(d()->name);
   $config->write();
 
+  // Directory permissions
+  provision_wordpress_setup_directories();
+
+  // Run the WordPress installer
   $admin_email = drush_get_option('client_email', 'fixme@example.org');
 
   $GLOBALS['argv'] = array(
