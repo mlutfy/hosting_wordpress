@@ -747,3 +747,14 @@ function _hosting_wpplatform_list_class($status) {
   $labels = _hosting_wpplatform_status_codes();
   return is_object($status) ? $labels[$status->wpplatform_status]['class'] : $labels[$status]['class'];
 }
+
+
+/**
+ * Alter the node types on which the Hosting module operates.
+ *
+ * @param array $types
+ *   An array of strings retresentikng node types.
+ */
+function hosting_wpplatform_hosting_context_node_types_alter(&$types) {
+  $types[] = 'wpplatform';
+}

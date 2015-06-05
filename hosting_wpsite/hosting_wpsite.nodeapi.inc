@@ -253,3 +253,13 @@ function hosting_wpsite_load($nodes) {
     }
   }
 }
+
+/**
+ * Alter the node types on which the Hosting module operates.
+ *
+ * @param array $types
+ *   An array of strings retresentikng node types.
+ */
+function hosting_wpsite_hosting_context_node_types_alter(&$types) {
+  $types[] = 'wpsite';
+}
