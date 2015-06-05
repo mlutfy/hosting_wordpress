@@ -17,7 +17,7 @@ Installation
 - Install wp-cli in ~/lib/wp-cli/ (FIXME: use ~/.composer ?)
 - Symlink wp-cli.php as ~/bin/wp, ex: "ln -s /var/aegir/lib/wp-cli/bin/wp /var/aegir/bin/wp"
 - You will probably want to add /var/aegir/bin/ in your $PATH, ex: export PATH=$PATH:/var/aegir/bin
-- Apply the 3 patches included in the patches directory (this may break install/verify of Drupal sites)
+- Apply the 2 patches included in the patches directory (this may break install/verify of Drupal sites)
 
 NB: 'provision' is usually located in /usr/share/drush/commands/, and 'hosting' is in ~/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/.
 
