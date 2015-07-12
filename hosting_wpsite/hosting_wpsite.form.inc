@@ -280,7 +280,7 @@ function hosting_wpsite_form($node, &$form_state) {
     '#required' => TRUE,
     '#description' => t('The platform you want the wpsite to be hosted on.'),
     '#options' => $platforms,
-    '#default_value' => isset($node->platform) ? $node->platform : NULL,
+    '#default_value' => isset($node->wpplatform) ? $node->wpplatform : NULL,
     '#ajax' => array(
       'callback' => 'hosting_wpsite_language_callback',
       'wrapper' => 'hosting-wpsite-field-wpsite-language' ,

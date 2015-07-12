@@ -9,7 +9,7 @@
  */
 function drush_provision_wordpress_provision_verify($url = NULL) {
   if (d()->type == 'wpplatform') {
-    drush_log(dt("CiviCRM: Running drush_wordpress_provision_verify on !type, name !name", array('!type' => d()->type, '!name' => d()->name)));
+    drush_log(dt("WordPress: Running drush_wordpress_provision_verify on !type, name !name", array('!type' => d()->type, '!name' => d()->name)));
 
     provision_file()->exists(d()->root . '/wp-includes')
       ->succeed('Directory @path seems to be a WordPress installation.')
@@ -22,6 +22,20 @@ function drush_provision_wordpress_provision_verify($url = NULL) {
     // Writes the wp-config.php file in the platform root.
     $config = new Provision_Config_wpplatform(d()->name);
     $config->write();
+
+    # FIXME: needs more testing
+    # d()->service('http')->write();
+  }
+  elseif (d()->type == 'wpsite') {
+    drush_log(dt("WordPress: Running drush_wordpress_provision_verify on !type, name !name", array('!type' => d()->type, '!name' => d()->name)));
+
+    d()->service_subscribe('server', '@server_master');
+    d()->service_subscribe('http', '@server_master');
+    d()->service_subscribe('wpplatform', d()->name);
+
+
+    # d()->service('http')->create_config('site');
+    # d()->service('http')->write();
   }
 }
 
@@ -33,9 +47,27 @@ function provision_wordpress_provision_apache_vhost_config($uri, $data) {
   // FIXME ?
   drush_log('WordPress: hello from provision_wordpress_provision_apache_vhost_config', 'ok');
 
-  # TODO
-  # $site_path = d()->site_path;
-  # fastcgi_param wp_content_dir {$site_path}/wp-content/;
+  $site_path = d()->site_path;
+
+  $conf = <<<EOF
+
+    RewriteEngine On
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.php [L]
+
+    <Directory $site_path>
+      Order allow,deny
+      Allow from all
+      Satisfy any
+      Require all granted
+
+      # Do not read any .htaccess in the platform
+      AllowOverride none
+    </Directory>
+
+EOF;
 
   return '';
 }

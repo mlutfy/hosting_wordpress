@@ -55,6 +55,9 @@ function provision_wordpress_drush_command() {
   $items['provision-wordpress-install'] = array(
     'description' => 'Install WordPress.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+    'options' => array(
+      'client_email' => dt('The email address of the client to use.'),
+    ),
   );
   $items['provision-wordpress-verify'] = array(
     'description' => 'Verify WordPress.',

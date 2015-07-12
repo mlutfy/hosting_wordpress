@@ -20,10 +20,12 @@ function hosting_hosting_wpsite_context_options(&$task) {
   // $profile = node_load($task->ref->profile);
   // $task->context_options['profile'] = $profile->short_name;
 
-  $client = node_load($task->ref->client);
-  $user = user_load($task->uid);
-  $task->options['client_email'] = $user->mail;
-  $task->context_options['client_name'] = $client->uname;
+  if ($task->task_type == 'wordpress-install') {
+    $client = node_load($task->ref->client);
+    $user = user_load($task->uid);
+    $task->options['client_email'] = $user->mail;
+    $task->context_options['client_name'] = $client->uname;
+  }
 }
 
 /**
