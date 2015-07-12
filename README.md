@@ -13,6 +13,8 @@ Installation
 
 *IMPORTANT:* run all the following commands as the 'aegir' user ('sudo -i -u aegir' or 'su -c /bin/bash aegir').
 
+*IMPORTANT:* this module has been tested mostly with nginx. There are issues when using Apache (see below).
+
 Copy the hosting_wordpress module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory:
 
     cd ~/hostmaster-7.x-3.x/sites/example.org/modules/
@@ -37,14 +39,14 @@ Make sure your Aegir user has a ~/.profile file, so that the .bashrc is read whe
 
 Composer adds its 'bin' directory to the $PATH, which makes it possible to use the 'wp' command easily.
 
-Finally, apply the 2 patches included in the patches directory (this may break install/verify of Drupal sites)
+Finally, apply the 3 patches included in the patches directory (this may break install/verify of Drupal sites)
 
 NB: when applying the patches, 'provision' is usually located in /usr/share/drush/commands/, and 'hosting' is in ~/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/.
 
 How to test
 ===========
 
-- Create a new platform on your filesystem, ex: mkdir /var/aegir/platforms/wordpress-4.2.2/; cd /var/aegir/platforms/wordpress-4.2.2/; wp core download
+- Create a new platform on your filesystem, ex: mkdir /var/aegir/platforms/wordpress-4.2/; cd /var/aegir/platforms/wordpress-4.2/; wp core download
 - Create a new WP Platform (node/add/wpplatform)
 - Create a new WP Site from there.
 - Access the URL of your new site.
@@ -54,9 +56,21 @@ How to test
 TODO and known bugs
 ===================
 
-* Define WP_CONTENT_DIR in wp-config.php to separate content.
 * Can't run 'verify' on the platform (workaround: edit the platform node and re-save).
 * CiviCRM support? https://github.com/andy-walker/wp-cli-civicrm
+
+Apache known bugs
+=================
+
+After installation, the vhost extras are not added to the vhost?
+
+* TODO: wp-content alias
+* TODO: wp_content_dir vhost variable (otherwise we get a blank page).
+
+  SetEnv wp_content_dir /var/aegir/platforms/wordpress-4.2/sites/t1.example.org/wp-content/
+  RewriteRule ^/wp-content/(.*)$ /sites/t1.example.org/wp-content/$1 [QSA,L]
+
+You can add these manually to the vhost (/var/aegir/config/server_master/apache/vhost/t1.example.org) after the installation, then restart Apache.
 
 How it works
 ============
