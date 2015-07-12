@@ -11,15 +11,29 @@ See: https://www.drupal.org/node/1044692
 Installation
 ============
 
-- Copy the hosting_wordpress module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory.
-- Enable the hosting_wpplatform and hosting_wpsite modules (drush @hostmaster en ...).
-- Run "drush @hostmaster provision-verify" so that Aegir does the magic include in ~/.drush/drushrc.php (c.f. do#2300537).
-- Install wp-cli in ~/lib/wp-cli/ (FIXME: use ~/.composer ?)
-- Symlink wp-cli.php as ~/bin/wp, ex: "ln -s /var/aegir/lib/wp-cli/bin/wp /var/aegir/bin/wp"
-- You will probably want to add /var/aegir/bin/ in your $PATH, ex: export PATH=$PATH:/var/aegir/bin
-- Apply the 2 patches included in the patches directory (this may break install/verify of Drupal sites)
+*IMPORTANT:* run all the following commands as the 'aegir' user ('sudo -i -u aegir' or 'su -c /bin/bash aegir').
 
-NB: 'provision' is usually located in /usr/share/drush/commands/, and 'hosting' is in ~/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/.
+Copy the hosting_wordpress module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory:
+
+    cd ~/hostmaster-7.x-3.x/sites/example.org/modules/
+    git clone https://github.com/mlutfy/hosting_wordpress.git
+
+Enable the hosting_wpplatform and hosting_wpsite modules:
+
+    drush @hostmaster en hosting_wpsite
+
+Run a 'verify' task on the Hostmaster so that Aegir does the magic include in ~/.drush/drushrc.php (c.f. do#2300537):
+
+    drush @hostmaster provision-verify
+
+Install wp-cli using composer (this should create a sylink in ~/.composer/vendor/bin/wp)
+
+    cd ~/
+    composer global require wp-cli/wp-cli
+
+Apply the 2 patches included in the patches directory (this may break install/verify of Drupal sites)
+
+NB: when applying the patches, 'provision' is usually located in /usr/share/drush/commands/, and 'hosting' is in ~/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/.
 
 How to test
 ===========
