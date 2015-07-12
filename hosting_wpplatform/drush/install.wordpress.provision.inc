@@ -29,9 +29,9 @@ function drush_provision_wordpress_install() {
   drush_log('WordPress: starting drush_provision_wordpress_install', 'ok');
 
   // d()->service_subscribe('platform', d()->wpplatform);
-  d()->service_subscribe('server', '@server_master');
-  d()->service_subscribe('http', '@server_master');
-  d()->service_subscribe('db', '@server_127.0.0.1');
+  d()->service_subscribe('server', '@server_master'); // FIXME hardcoded name?
+  d()->service_subscribe('http', '@server_master'); // FIXME hardcoded name?
+  d()->service_subscribe('db', d()->db_server->name);
 
   d()->service('db')->create_site_database();
   d()->service('http')->create_config('site');
