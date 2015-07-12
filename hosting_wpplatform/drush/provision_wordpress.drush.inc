@@ -40,11 +40,6 @@ function provision_wordpress_provision_register_autoload() {
   }
 }
 
-// FIXME: this needs to run very early in the bootstrap, otherwise:
-// PHP Fatal error:  Class 'Provision_Context_wpplatform' not found in /usr/share/drush/commands/provision/provision.context.inc on line 127
-// UPDATE: this seems to be fixed now, but no idea what fixed it.
-# provision_wordpress_provision_register_autoload();
-
 /**
  * Implements hook_provision_services().
  */
