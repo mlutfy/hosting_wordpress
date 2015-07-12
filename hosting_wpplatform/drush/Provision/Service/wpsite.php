@@ -35,6 +35,10 @@ class Provision_Service_wpsite extends Provision_Service {
       drush_log(dt('WordPress: loading !file', array('!file' => $filename)));
       include($filename);
     }
+
+    // Setup the constants for wp-cli
+    // FIXME: doesn't work for the installation, hard to debug.
+    // self::setup_wpcli_environment();
   }
 
   static function subscribe_wpplatform($context) {
@@ -50,5 +54,68 @@ class Provision_Service_wpsite extends Provision_Service {
     $context->setProperty('db_server', '@server_master');
     $context->is_oid('db_server');
     $context->service_subscribe('db', $context->db_server->name);
+  }
+
+  /**
+   * Helper function to load wp-cli.
+   * Code mostly copied from wp-cli/php/wp-cli.php
+   *
+   * FIXME: not used at the moment. Installation doesn't work using this method.
+   * Hard to debug.
+   */
+  function setup_wpcli_environment() {
+    if (defined('WP_CLI_ROOT')) {
+      drush_log('WordPress: setup_wpcli_environment already initialized.');
+      return;
+    }
+
+    define('WP_CLI_ROOT', '/var/aegir/.composer/vendor/wp-cli/wp-cli');
+
+    // This is from WP_CLI/Runner.php set_wp_root()
+    define('ABSPATH', d()->wpplatform->root . '/');
+    $_SERVER['DOCUMENT_ROOT'] = realpath(ABSPATH);
+
+    // Can be used by plugins/themes to check if WP-CLI is running or not
+    define('WP_CLI', true);
+    define('WP_CLI_VERSION', trim(file_get_contents(WP_CLI_ROOT . '/VERSION')));
+
+    # define('WP_INSTALLING', true);
+    # define('WP_SETUP_CONFIG', true);
+
+    // Set common headers, to prevent warnings from plugins
+    $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.0';
+    $_SERVER['HTTP_USER_AGENT'] = '';
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+
+    include WP_CLI_ROOT . '/php/utils.php';
+    include WP_CLI_ROOT . '/php/dispatcher.php';
+    include WP_CLI_ROOT . '/php/class-wp-cli.php';
+    include WP_CLI_ROOT . '/php/class-wp-cli-command.php';
+
+    // Try to catch warnings during installation.
+    # $logger = new Provision_Loggers_Drush(FALSE);
+    # \WP_CLI::set_logger($logger);
+
+    \WP_CLI\Utils\load_dependencies();
+
+    WP_CLI::get_runner()->before_wp_load();
+
+    // Load wp-config.php code, in the global scope
+    # eval(WP_CLI::get_runner()->get_wp_config_code());
+
+    // Load Core, mu-plugins, plugins, themes etc.
+    # This should not be done unless we are installed, and DB creds are loaded.
+    # FIXME for db cli.
+    # require WP_CLI_ROOT . '/php/wp-settings-cli.php';
+
+    // Fix memory limit. See http://core.trac.wordpress.org/ticket/14889
+    @ini_set( 'memory_limit', -1 );
+
+    // Load all the admin APIs, for convenience
+    # [ML] FIXME probably required..
+    # require ABSPATH . 'wp-admin/includes/admin.php';
+
+    drush_log('WordPress: setup_wpcli_environment initialization complete.', 'ok');
   }
 }
