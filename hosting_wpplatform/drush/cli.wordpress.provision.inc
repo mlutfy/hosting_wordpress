@@ -1,12 +1,6 @@
 <?php
 
 /**
- * 
- */
-function drush_provision_wordpress_cli_validate() {
-}
-
-/**
  * Implements the provision-wordpress-cli command.
  */
 function drush_provision_wordpress_cli() {
