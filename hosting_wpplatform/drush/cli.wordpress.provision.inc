@@ -26,6 +26,6 @@ function drush_provision_wordpress_cli() {
 
   // FIXME: this causes drush to exist with:
   // "Drush command terminated abnormally due to an unrecoverable error."
-  define('WP_CLI_ROOT', '/var/aegir/lib/wp-cli');
-  require_once '/var/aegir/lib/wp-cli/php/wp-cli.php';
+  define('WP_CLI_ROOT', '/var/aegir/.composer/vendor/wp-cli/wp-cli');
+  require_once WP_CLI_ROOT . '/php/wp-cli.php';
 }

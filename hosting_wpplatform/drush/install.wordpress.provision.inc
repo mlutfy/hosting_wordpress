@@ -69,6 +69,17 @@ function drush_provision_wordpress_install() {
   // Run the WordPress installer
   $admin_email = drush_get_option('client_email', 'fixme@example.org');
 
+/*
+  // Wishful thinking (but this mysteriously fails because wp-cli is not correctly initialized, see wpsite service):
+  WP_CLI::run_command(array('core', 'install'), array(
+    'url' => d()->uri,
+    'title' => d()->uri,
+    'admin_user' => 'admin',
+    'admin_email' => $admin_email,
+    'admin_password' => 'changeme', // FIXME TODO
+  ));
+*/
+
   $GLOBALS['argv'] = array(
     'wp',
     '--path=' . d()->root . '/',
@@ -81,8 +92,8 @@ function drush_provision_wordpress_install() {
     '--admin_password=changeme', // FIXME
   );
 
-  define('WP_CLI_ROOT', '/var/aegir/lib/wp-cli');
-  require_once '/var/aegir/lib/wp-cli/php/wp-cli.php';
+  define('WP_CLI_ROOT', '/var/aegir/.composer/vendor/wp-cli/wp-cli');
+  require_once WP_CLI_ROOT . '/php/wp-cli.php';
 
   d()->service('http')->restart();
 
