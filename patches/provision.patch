@@ -7,7 +7,7 @@ index d35a361..486979d 100644
      return array(
        $this->server,
 -      $this->context->platform->server,
-+      $this->context->wpplatform->server,
++      isset($this->context->wpplatform) ? $this->context->wpplatform->server : $this->context->platform->server,
      );
    }
  }
