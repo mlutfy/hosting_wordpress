@@ -80,6 +80,9 @@ function drush_provision_wordpress_install() {
   ));
 */
 
+  // This helps with wp-cli require_maybe() statements
+  global $wp_version;
+
   $GLOBALS['argv'] = array(
     'wp',
     '--path=' . d()->root . '/',

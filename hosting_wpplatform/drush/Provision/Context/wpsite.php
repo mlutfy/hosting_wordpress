@@ -65,6 +65,10 @@ class Provision_Context_wpsite extends Provision_Context {
 
     // this can potentially be handled by a Drupal sub class
     $this->setProperty('profile', 'default');
+
+    // required for the way we use wp-cli (include)
+    // otherwise the require_maybe() statements will fail.
+    global $wp_version;
   }
 
   /**

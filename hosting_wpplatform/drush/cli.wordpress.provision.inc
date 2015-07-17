@@ -4,8 +4,6 @@
  * Implements the provision-wordpress-cli command.
  */
 function drush_provision_wordpress_cli() {
-  drush_log(print_r($GLOBALS['argv'], 1));
-
   // Normally argv will have:
   // 0 = /path/to/drush.php
   // 1 = --php=foo
@@ -23,6 +21,9 @@ function drush_provision_wordpress_cli() {
 
   $GLOBALS['argv'][0] = 'wp';
   $GLOBALS['argv'][1] = '--path=' . d()->root . '/';
+
+  // This helps with wp-cli require_maybe() statements
+  global $wp_version;
 
   // FIXME: this causes drush to exist with:
   // "Drush command terminated abnormally due to an unrecoverable error."
