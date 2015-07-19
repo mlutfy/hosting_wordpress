@@ -63,6 +63,10 @@ function provision_wordpress_drush_command() {
     'description' => 'Verify WordPress.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
+  $items['provision-wordpress-delete'] = array(
+    'description' => 'Delete WordPress.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
   $items['provision-wordpress-cli'] = array(
     'description' => 'Run a wp-cli command.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
