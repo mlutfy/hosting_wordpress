@@ -69,7 +69,7 @@ function provision_wordpress_provision_apache_vhost_config($uri, $data) {
 
 EOF;
 
-  return '';
+  return $conf;
 }
 
 /**
