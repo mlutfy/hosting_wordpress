@@ -8,12 +8,19 @@ published if an issue is found. See 'support' for more information.
 
 See: https://www.drupal.org/node/1044692
 
+Requirements
+============
+
+* Operating system: Debian GNU/Linux Jessie 8.x
+* Web server: nginx or Apache 2.4+
+* Aegir 3 (7.x-3.x)
+
+Other environments are non-tested and may not work (but you are most welcomed to debug it and send a patch).
+
 Installation
 ============
 
 *IMPORTANT:* run all the following commands as the 'aegir' user ('sudo -i -u aegir' or 'su -c /bin/bash aegir').
-
-*IMPORTANT:* this module has been tested mostly with nginx. There are issues when using Apache (see below).
 
 Copy the hosting_wordpress module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory:
 
@@ -50,7 +57,6 @@ How to test
 - Create a new WP Platform (node/add/wpplatform)
 - Create a new WP Site from there.
 - Access the URL of your new site.
-- NB: I have only tested on nginx so far. There may be rewrites missing for Apache.
 - You can also use wp-cli in a site context, using, for example: "drush @mysite.example.org wp user list"
 
 TODO and known bugs
@@ -58,19 +64,6 @@ TODO and known bugs
 
 * Can't run 'verify' on the platform (workaround: edit the platform node and re-save).
 * CiviCRM support? https://github.com/andy-walker/wp-cli-civicrm
-
-Apache known bugs
-=================
-
-After installation, the vhost extras are not added to the vhost?
-
-* TODO: wp-content alias
-* TODO: wp_content_dir vhost variable (otherwise we get a blank page).
-
-  SetEnv wp_content_dir /var/aegir/platforms/wordpress-4.2/sites/t1.example.org/wp-content/
-  RewriteRule ^/wp-content/(.*)$ /sites/t1.example.org/wp-content/$1 [QSA,L]
-
-You can add these manually to the vhost (/var/aegir/config/server_master/apache/vhost/t1.example.org) after the installation, then restart Apache.
 
 How it works
 ============

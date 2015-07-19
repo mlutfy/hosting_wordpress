@@ -43,20 +43,26 @@ function drush_provision_wordpress_provision_verify($url = NULL) {
  * Implements drush_hook_provision_apache_vhost_config().
  */
 function provision_wordpress_provision_apache_vhost_config($uri, $data) {
-  // FIXME ?
-  drush_log('WordPress: hello from provision_wordpress_provision_apache_vhost_config', 'ok');
+  drush_log('WordPress: hello from provision_wordpress_provision_apache_vhost_config');
 
   $site_path = d()->site_path;
+  $site_name = d()->uri;
+  $platform_root = d()->root;
 
   $conf = <<<EOF
 
     RewriteEngine On
-    RewriteRule ^index\.php$ - [L]
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule . /index.php [L]
 
-    <Directory $site_path>
+    SetEnv wp_content_dir {$site_path}/wp-content/
+    RewriteRule ^/wp-content/(.*)$ /sites/{$site_name}/wp-content/$1 [QSA,L]
+
+    <Directory $platform_root>
+      RewriteBase /
+      RewriteRule ^index\.php$ - [L]
+      RewriteCond %{REQUEST_FILENAME} !-f
+      RewriteCond %{REQUEST_FILENAME} !-d
+      RewriteRule . /index.php [L]
+
       Order allow,deny
       Allow from all
       Satisfy any
