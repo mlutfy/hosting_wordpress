@@ -10,12 +10,6 @@ class Provision_Service_wpsite extends Provision_Service {
     drush_log('WordPress: service subscribe_wpsite');
     $context->is_oid('wpsite');
 
-    // Copied from provision/http/Provision/Service/http.php
-    // Not sure if necessary.
-    $context->setProperty('web_server', '@server_master');
-    $context->is_oid('web_server');
-    $context->service_subscribe('http', $context->web_server->name);
-
     // Copied from provision/db/Provision/Service/db.php
     $context->setProperty('db_server', '@server_master');
     $context->is_oid('db_server');
@@ -46,9 +40,11 @@ class Provision_Service_wpsite extends Provision_Service {
 
     // Copied from provision/http/Provision/Service/http.php
     // Not sure if necessary.
-    $context->setProperty('web_server', '@server_master');
+/*
+    $context->setProperty('web_server', $context->web_server->name);
     $context->is_oid('web_server');
     $context->service_subscribe('http', $context->web_server->name);
+*/
 
     // Copied from provision/db/Provision/Service/db.php
     $context->setProperty('db_server', '@server_master');

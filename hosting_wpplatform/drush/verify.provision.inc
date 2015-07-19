@@ -33,7 +33,6 @@ function drush_provision_wordpress_provision_verify($url = NULL) {
     d()->service_subscribe('http', '@server_master');
     d()->service_subscribe('wpplatform', d()->name);
 
-
     # d()->service('http')->create_config('site');
     # d()->service('http')->write();
   }
