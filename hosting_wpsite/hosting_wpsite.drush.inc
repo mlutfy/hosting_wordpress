@@ -199,7 +199,8 @@ function hosting_wpsite_post_hosting_wordpress_delete_task($task, $data) {
     hosting_wpsite_post_hosting_backup_task($task, $data);
 
     // Clean up package instances
-    hosting_package_instance_sync($task->ref->nid, 'wpsite');
+    # TODO: not supported for now (we do not manage wp themes/plugins)
+    # hosting_package_instance_sync($task->ref->nid, 'wpsite');
   }
 }
 
@@ -309,5 +310,21 @@ function hosting_wpsite_post_hosting_backup_delete_task($task, $data) {
         hosting_wpsite_delete_backup($bid);
       }
     }
+  }
+}
+
+/**
+ * Implements hook_hosting_post_backup().
+ *
+ * Adds the data file that was saved to the site backup history.
+ * This is needed to be able to restore.
+ */
+function hosting_wpsite_post_hosting_backup_task($task, $data) {
+  if ($data['context']['backup_file'] && $task->ref->type == 'wpsite') {
+    $platform = node_load($task->ref->wpplatform);
+
+    $desc = $task->task_args['description'];
+    $desc = ($desc) ? $desc : t('Generated on request');
+    hosting_site_add_backup($task->ref->nid, $platform->web_server, $data['context']['backup_file'], $desc, $data['context']['backup_file_size']);
   }
 }
