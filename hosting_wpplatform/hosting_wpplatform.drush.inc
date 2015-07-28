@@ -111,6 +111,10 @@ function hosting_wpplatform_post_hosting_verify_task($task, $data) {
  * Implements hook_hosting_post_DELETE().
  */
 function hosting_wpplatform_post_hosting_delete_task($task, $data) {
+/* [ML] NOT IMPLEMENTED YET. "as-is", this code would run on a normal drupal platform delete.
+   We probably need a "wordpress-delete" task.
+*/
+/*
   $task->ref->wpplatform_status = HOSTING_WPPLATFORM_DELETED;
   $task->ref->no_verify = TRUE;
   node_save($task->ref);
@@ -119,6 +123,7 @@ function hosting_wpplatform_post_hosting_delete_task($task, $data) {
     ->condition('pid', $task->ref->nid)
     ->execute();
   // Clean up package instances
+*/
 /* TODO
   hosting_package_instance_sync($task->ref->nid, 'wpplatform');
 */
