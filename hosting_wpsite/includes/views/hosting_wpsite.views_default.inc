@@ -279,7 +279,7 @@ function hosting_wpsite_views_default_views() {
     'wpsite' => 'wpsite',
   );
   $handler->display->display_options['arguments']['nid_1']['validate_options']['access'] = TRUE;
-  $translatables['hosting_wp_site_list'] = array(
+  $translatables['hosting_wpsite_list'] = array(
     t('Defaults'),
     t('WP Sites'),
     t('more'),
@@ -308,5 +308,6 @@ function hosting_wpsite_views_default_views() {
     t('Sites installed on this platform'),
   );
 
+  $views[] = $view;
   return $views;
 }
