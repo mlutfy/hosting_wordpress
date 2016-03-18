@@ -43,6 +43,10 @@ function drush_provision_wordpress_provision_verify($url = NULL) {
  * Implements drush_hook_provision_apache_vhost_config().
  */
 function provision_wordpress_provision_apache_vhost_config($uri, $data) {
+  if (d()->type != 'wpsite') {
+    return "";
+  }
+
   drush_log('WordPress: hello from provision_wordpress_provision_apache_vhost_config');
 
   $site_path = d()->site_path;
@@ -74,6 +78,7 @@ function provision_wordpress_provision_apache_vhost_config($uri, $data) {
 
 EOF;
 
+  drush_log('WordPress: leaving provision_wordpress_provision_apache_vhost_config');
   return $conf;
 }
 
@@ -85,6 +90,10 @@ EOF;
  * We will want to block install.php, but might want to allow other scripts.
  */
 function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
+  if (d()->type != 'wpsite') {
+    return "";
+  }
+
   drush_log('WordPress: hello from provision_wordpress_provision_nginx_vhost_config', 'ok');
 
   // FIXME: Quick & dirty confs. There is probably a better way.
@@ -132,5 +141,6 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
 
 EOF;
 
+  drush_log('WordPress: leaving provision_wordpress_provision_nginx_vhost_config', 'ok');
   return $conf;
 }
