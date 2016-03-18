@@ -307,7 +307,7 @@ function hosting_wpplatform_form(&$node) {
       '#type' => 'textfield',
       '#title' => t('Publish path'),
       '#required' => TRUE,
-      '#description' => t('The absolute path on the filesystem where the sites will be hosted. This needs to be created manually and initialized before your wpplatform works properly. It also needs to be a unique path not already in use by a wpplatform on any server.<br />For example, run the following shell commands:<pre>%commands</pre>Your publish path is the absolute path to the directory that gets created.<br />Alternatively, you can specify a makefile below, and the wpplatform will be created automatically if the path specified here does not exist.<br />You are still required to enter the absolute path above, as it will be treated as the target directory by the makefile.', array('%commands' => "cd /var/aegir/wpplatforms\ndrush dl drupal\n")),
+      '#description' => t('The absolute path on the filesystem where the sites will be hosted. This needs to be created manually and initialized before your wpplatform works properly. It also needs to be a unique path not already in use by a wpplatform on any server.<br />For example, run the following shell commands:<pre>%commands</pre>Your publish path is the absolute path to the directory that gets created.<br />Alternatively, you can specify a makefile below, and the wpplatform will be created automatically if the path specified here does not exist.<br />You are still required to enter the absolute path above, as it will be treated as the target directory by the makefile.', array('%commands' => "cd /var/aegir/platforms\nmkdir wordpress-x.y\nwp core download\n")),
       '#size' => 40,
       '#default_value' => isset($node->publish_path) ? $node->publish_path : NULL,
       '#maxlength' => 255,
@@ -327,6 +327,7 @@ function hosting_wpplatform_form(&$node) {
     );
   }
 
+/* NOT IMPLEMENTED
   $form['frommakefile'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
@@ -354,6 +355,7 @@ function hosting_wpplatform_form(&$node) {
       1 => t('Working copy - preserves SCM files'),
     ),
   );
+*/
 
   $form['#after_build'][] = 'hosting_wpplatform_form_wpplatform_after_build';
 
@@ -731,13 +733,12 @@ function hosting_wpplatform_hosting_summary() {
 /**
  * Implements hook_views_api().
  */
-# [ML] TODO
-# function hosting_wpplatform_views_api() {
-#   return array(
-#     'api' => 3,
-#     'path' => drupal_get_path('module', 'hosting_wpplatform') . '/includes/views',
-#   );
-# }
+function hosting_wpplatform_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'hosting_wpplatform') . '/includes/views',
+  );
+}
 
 /**
  * Define the classes that correspond to the wpplatform status.

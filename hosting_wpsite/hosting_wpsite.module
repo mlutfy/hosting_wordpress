@@ -482,9 +482,9 @@ function hosting_wpsite_count($wpplatform = NULL, $statuses = NULL) {
     $statuses = array(HOSTING_WPSITE_ENABLED);
   }
 
-  $query = db_select('hosting_site')
+  $query = db_select('hosting_wpsite')
     ->addTag('hosting_wpsite_count')
-    ->fields('hosting_site', array('nid'));
+    ->fields('hosting_wpsite', array('nid'));
 
   if (count($statuses)) {
     $query->condition('status', $statuses);

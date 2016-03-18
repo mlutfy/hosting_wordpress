@@ -5,7 +5,7 @@
  *
  * @ingroup views_field_handlers
  */
-class hosting_platform_handler_field_release extends views_handler_field {
+class hosting_wpplatform_handler_field_release extends views_handler_field {
   function render($values) {
     $node = node_load($values->nid);
     if (empty($node->release)) {

@@ -7,16 +7,16 @@
 /**
  * Implements hook_views_default_views().
  */
-function hosting_platform_views_default_views() {
+function hosting_wpplatform_views_default_views() {
   $views = array();
 
-  // Exported view: hosting_platform_list
+  // Exported view: hosting_wpplatform_list
   $view = new view();
-  $view->name = 'hosting_platform_list';
-  $view->description = 'Display a list of platforms in Aegir.';
-  $view->tag = 'hosting_platform';
+  $view->name = 'hosting_wpplatform_list';
+  $view->description = 'Display a list of WordPress platforms in Aegir.';
+  $view->tag = 'hosting_wpplatform';
   $view->base_table = 'node';
-  $view->human_name = 'Hosting Platform List';
+  $view->human_name = 'Hosting WordPress Platform List';
   $view->core = 6;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -84,9 +84,9 @@ function hosting_platform_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  /* Relationship: Hosting Platform: Web Server */
+  /* Relationship: Hosting WP Platform: Web Server */
   $handler->display->display_options['relationships']['web_server']['id'] = 'web_server';
-  $handler->display->display_options['relationships']['web_server']['table'] = 'hosting_platform';
+  $handler->display->display_options['relationships']['web_server']['table'] = 'hosting_wpplatform';
   $handler->display->display_options['relationships']['web_server']['field'] = 'web_server';
   /* Field: Bulk operations: Content */
   $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
@@ -163,28 +163,28 @@ function hosting_platform_views_default_views() {
         'url' => '',
       ),
     ),
-    'action::hosting_platform_delete_action' => array(
+    'action::hosting_wpplatform_delete_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 0,
       'override_label' => 1,
       'label' => 'Delete',
     ),
-    'action::hosting_platform_lock_action' => array(
+    'action::hosting_wpplatform_lock_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 1,
       'override_label' => 1,
       'label' => 'Lock',
     ),
-    'action::hosting_platform_unlock_action' => array(
+    'action::hosting_wpplatform_unlock_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 1,
       'override_label' => 1,
       'label' => 'Unlock',
     ),
-    'action::hosting_platform_verify_action' => array(
+    'action::hosting_wpplatform_verify_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 1,
@@ -243,7 +243,7 @@ function hosting_platform_views_default_views() {
   );
   /* Field: Class */
   $handler->display->display_options['fields']['status']['id'] = 'status';
-  $handler->display->display_options['fields']['status']['table'] = 'hosting_platform';
+  $handler->display->display_options['fields']['status']['table'] = 'hosting_wpplatform';
   $handler->display->display_options['fields']['status']['field'] = 'status';
   $handler->display->display_options['fields']['status']['ui_name'] = 'Class';
   $handler->display->display_options['fields']['status']['exclude'] = TRUE;
@@ -254,9 +254,9 @@ function hosting_platform_views_default_views() {
   $handler->display->display_options['fields']['title']['field'] = 'title';
   $handler->display->display_options['fields']['title']['label'] = 'Platform';
   $handler->display->display_options['fields']['title']['element_class'] = 'hosting-status';
-  /* Field: Hosting Platform: Release */
+  /* Field: Hosting WP Platform: Release */
   $handler->display->display_options['fields']['release']['id'] = 'release';
-  $handler->display->display_options['fields']['release']['table'] = 'hosting_platform';
+  $handler->display->display_options['fields']['release']['table'] = 'hosting_wpplatform';
   $handler->display->display_options['fields']['release']['field'] = 'release';
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title_1']['id'] = 'title_1';
@@ -264,15 +264,15 @@ function hosting_platform_views_default_views() {
   $handler->display->display_options['fields']['title_1']['field'] = 'title';
   $handler->display->display_options['fields']['title_1']['relationship'] = 'web_server';
   $handler->display->display_options['fields']['title_1']['label'] = 'Server';
-  /* Field: Hosting Platform: Verified Date */
+  /* Field: Hosting WP Platform: Verified Date */
   $handler->display->display_options['fields']['verified']['id'] = 'verified';
-  $handler->display->display_options['fields']['verified']['table'] = 'hosting_platform';
+  $handler->display->display_options['fields']['verified']['table'] = 'hosting_wpplatform';
   $handler->display->display_options['fields']['verified']['field'] = 'verified';
   $handler->display->display_options['fields']['verified']['label'] = 'Verified';
   $handler->display->display_options['fields']['verified']['date_format'] = 'time ago';
-  /* Field: Hosting Platform: Sites */
+  /* Field: Hosting WP Platform: Sites */
   $handler->display->display_options['fields']['sites']['id'] = 'sites';
-  $handler->display->display_options['fields']['sites']['table'] = 'hosting_platform';
+  $handler->display->display_options['fields']['sites']['table'] = 'hosting_wpplatform';
   $handler->display->display_options['fields']['sites']['field'] = 'sites';
   /* Sort criterion: Content: Title */
   $handler->display->display_options['sorts']['title']['id'] = 'title';
@@ -296,9 +296,9 @@ function hosting_platform_views_default_views() {
   $handler->display->display_options['filters']['status']['table'] = 'node';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
-  /* Filter criterion: Hosting Platform: Status */
+  /* Filter criterion: Hosting WP Platform: Status */
   $handler->display->display_options['filters']['status_1']['id'] = 'status_1';
-  $handler->display->display_options['filters']['status_1']['table'] = 'hosting_platform';
+  $handler->display->display_options['filters']['status_1']['table'] = 'hosting_wpplatform';
   $handler->display->display_options['filters']['status_1']['field'] = 'status';
   $handler->display->display_options['filters']['status_1']['operator'] = '!=';
   $handler->display->display_options['filters']['status_1']['value']['value'] = '-2';
@@ -308,10 +308,10 @@ function hosting_platform_views_default_views() {
   $handler->display->display_options['defaults']['access'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['access']['perm'] = 'view platform';
-  $handler->display->display_options['path'] = 'hosting/platforms';
+  $handler->display->display_options['path'] = 'hosting/wpplatforms';
   $handler->display->display_options['menu']['type'] = 'normal';
-  $handler->display->display_options['menu']['title'] = 'Platforms';
-  $handler->display->display_options['menu']['description'] = 'List of platforms';
+  $handler->display->display_options['menu']['title'] = 'WP Platforms';
+  $handler->display->display_options['menu']['description'] = 'List of WordPress platforms';
   $handler->display->display_options['menu']['weight'] = '2';
   $handler->display->display_options['menu']['name'] = 'main-menu';
   $handler->display->display_options['menu']['context'] = 0;

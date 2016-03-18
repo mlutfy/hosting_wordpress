@@ -5,7 +5,7 @@
  *
  * @ingroup views_field_handlers
  */
-class hosting_site_handler_field_status extends views_handler_field {
+class hosting_wpsite_handler_field_status extends views_handler_field {
   /**
    * Constructor; calls to base object constructor.
    */
@@ -40,7 +40,7 @@ class hosting_site_handler_field_status extends views_handler_field {
 
   function render($values) {
     $value = $values->{$this->field_alias};
-    $output = _hosting_site_status($value);
+    $output = _hosting_wpsite_status($value);
 
     switch ($this->options['status_mode']) {
       case 'image':
@@ -50,7 +50,7 @@ class hosting_site_handler_field_status extends views_handler_field {
         return "<span class='hosting-status'>{$output}</span>";
 
       case 'class':
-        return _hosting_site_list_class($value, $values->{$this->aliases['verified']});
+        return _hosting_wpsite_list_class($value, $values->{$this->aliases['verified']});
     }
     return $output;
   }
