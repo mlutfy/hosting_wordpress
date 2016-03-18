@@ -7,16 +7,16 @@
 /**
  * Implements hook_views_default_views().
  */
-function hosting_site_views_default_views() {
+function hosting_wpsite_views_default_views() {
   $views = array();
 
-  // Exported view: hosting_site_list
+  // Exported view: hosting_wpsite_list
   $view = new view();
-  $view->name = 'hosting_site_list';
+  $view->name = 'hosting_wpsite_list';
   $view->description = 'Display a list of sites hosted in Aegir.';
-  $view->tag = 'hosting_site';
+  $view->tag = 'hosting_wpsite';
   $view->base_table = 'node';
-  $view->human_name = 'Hosting Site List';
+  $view->human_name = 'Hosting WP Site List';
   $view->core = 6;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -96,21 +96,21 @@ function hosting_site_views_default_views() {
     ),
   );
   $handler->display->display_options['exposed_block'] = TRUE;
-  /* Relationship: Hosting Site: Install Profile */
+  /* Relationship: Hosting WP Site: Install Profile */
   $handler->display->display_options['relationships']['profile']['id'] = 'profile';
-  $handler->display->display_options['relationships']['profile']['table'] = 'hosting_site';
+  $handler->display->display_options['relationships']['profile']['table'] = 'hosting_wpsite';
   $handler->display->display_options['relationships']['profile']['field'] = 'profile';
-  /* Relationship: Hosting Site: Platform */
+  /* Relationship: Hosting WP Site: Platform */
   $handler->display->display_options['relationships']['platform']['id'] = 'platform';
-  $handler->display->display_options['relationships']['platform']['table'] = 'hosting_site';
+  $handler->display->display_options['relationships']['platform']['table'] = 'hosting_wpsite';
   $handler->display->display_options['relationships']['platform']['field'] = 'platform';
-  /* Relationship: Hosting Site: Client */
+  /* Relationship: Hosting WP Site: Client */
   $handler->display->display_options['relationships']['client']['id'] = 'client';
-  $handler->display->display_options['relationships']['client']['table'] = 'hosting_site';
+  $handler->display->display_options['relationships']['client']['table'] = 'hosting_wpsite';
   $handler->display->display_options['relationships']['client']['field'] = 'client';
-  /* Relationship: Hosting Site: Database Server */
+  /* Relationship: Hosting WP Site: Database Server */
   $handler->display->display_options['relationships']['db_server']['id'] = 'db_server';
-  $handler->display->display_options['relationships']['db_server']['table'] = 'hosting_site';
+  $handler->display->display_options['relationships']['db_server']['table'] = 'hosting_wpsite';
   $handler->display->display_options['relationships']['db_server']['field'] = 'db_server';
   /* Field: Bulk operations: Content */
   $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
@@ -250,35 +250,35 @@ function hosting_site_views_default_views() {
       'override_label' => 0,
       'label' => '',
     ),
-    'action::hosting_site_backup_action' => array(
+    'action::hosting_wpsite_backup_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 0,
       'override_label' => 1,
       'label' => 'Backup',
     ),
-    'action::hosting_site_delete_action' => array(
+    'action::hosting_wpsite_delete_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 0,
       'override_label' => 1,
       'label' => 'Delete',
     ),
-    'action::hosting_site_disable_action' => array(
+    'action::hosting_wpsite_disable_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 0,
       'override_label' => 1,
       'label' => 'Disable',
     ),
-    'action::hosting_site_enable_action' => array(
+    'action::hosting_wpsite_enable_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 1,
       'override_label' => 1,
       'label' => 'Enable',
     ),
-    'action::hosting_site_verify_action' => array(
+    'action::hosting_wpsite_verify_action' => array(
       'selected' => 1,
       'postpone_processing' => 0,
       'skip_confirmation' => 1,
@@ -302,7 +302,7 @@ function hosting_site_views_default_views() {
   );
   /* Field: Class */
   $handler->display->display_options['fields']['status']['id'] = 'status';
-  $handler->display->display_options['fields']['status']['table'] = 'hosting_site';
+  $handler->display->display_options['fields']['status']['table'] = 'hosting_wpsite';
   $handler->display->display_options['fields']['status']['field'] = 'status';
   $handler->display->display_options['fields']['status']['ui_name'] = 'Class';
   $handler->display->display_options['fields']['status']['exclude'] = TRUE;
@@ -335,14 +335,14 @@ function hosting_site_views_default_views() {
   $handler->display->display_options['fields']['title_2']['label'] = 'Platform';
   $handler->display->display_options['fields']['title_2']['alter']['max_length'] = '20';
   $handler->display->display_options['fields']['title_2']['alter']['trim'] = TRUE;
-  /* Field: Hosting Site: Verified */
+  /* Field: Hosting WP Site: Verified */
   $handler->display->display_options['fields']['verified']['id'] = 'verified';
-  $handler->display->display_options['fields']['verified']['table'] = 'hosting_site';
+  $handler->display->display_options['fields']['verified']['table'] = 'hosting_wpsite';
   $handler->display->display_options['fields']['verified']['field'] = 'verified';
   $handler->display->display_options['fields']['verified']['exclude'] = TRUE;
-  /* Sort criterion: Hosting Site: Status */
+  /* Sort criterion: Hosting WP Site: Status */
   $handler->display->display_options['sorts']['status']['id'] = 'status';
-  $handler->display->display_options['sorts']['status']['table'] = 'hosting_site';
+  $handler->display->display_options['sorts']['status']['table'] = 'hosting_wpsite';
   $handler->display->display_options['sorts']['status']['field'] = 'status';
   $handler->display->display_options['sorts']['status']['order'] = 'DESC';
   /* Sort criterion: Content: Title */
@@ -357,9 +357,9 @@ function hosting_site_views_default_views() {
     'site' => 'site',
   );
   $handler->display->display_options['filters']['type']['expose']['operator'] = FALSE;
-  /* Filter criterion: Hosting Site: Status */
+  /* Filter criterion: Hosting WP Site: Status */
   $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'hosting_site';
+  $handler->display->display_options['filters']['status']['table'] = 'hosting_wpsite';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['operator'] = 'not in';
   $handler->display->display_options['filters']['status']['value'] = array(
@@ -558,9 +558,9 @@ function hosting_site_views_default_views() {
     'site' => 'site',
   );
   $handler->display->display_options['filters']['type']['expose']['operator'] = FALSE;
-  /* Filter criterion: Hosting Site: Status */
+  /* Filter criterion: Hosting WP Site: Status */
   $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'hosting_site';
+  $handler->display->display_options['filters']['status']['table'] = 'hosting_wpsite';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['operator'] = 'not in';
   $handler->display->display_options['filters']['status']['value'] = array(

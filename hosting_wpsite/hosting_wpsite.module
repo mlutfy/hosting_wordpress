@@ -719,14 +719,12 @@ function _hosting_wpsite_list_class($node, $verified = NULL) {
 /**
  * Views integration.
  */
-/* TODO
 function hosting_wpsite_views_api() {
   return array(
     'api' => 3,
     'path' => drupal_get_path('module', 'hosting_wpsite') . '/includes/views',
   );
 }
-*/
 
 /**
  * Theme function for install profile item.

@@ -6,7 +6,6 @@ dependencies[] = hosting_client
 dependencies[] = hosting_wpplatform
 core = 7.x
 
-; TODO
-; files[] = includes/views/handlers/hosting_site_handler_field_language.inc
-; files[] = includes/views/handlers/hosting_site_handler_field_status.inc
-; files[] = includes/views/plugins/hosting_site_plugin_access.inc
+files[] = includes/views/handlers/hosting_wpsite_handler_field_language.inc
+files[] = includes/views/handlers/hosting_wpsite_handler_field_status.inc
+files[] = includes/views/plugins/hosting_wpsite_plugin_access.inc
