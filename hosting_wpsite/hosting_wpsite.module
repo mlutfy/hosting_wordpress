@@ -784,8 +784,7 @@ function hosting_wpsite_block_view_alter(&$data, $block) {
     if ($node = menu_get_object()) {
       // We only want to show a list of sites on a server with a database,
       // or on install profile package pages.
-      if (($node->type == 'server' && !array_key_exists('db', $node->services))
-       || ($node->type == 'package' && $node->package_type != 'profile')) {
+      if (($node->type == 'server' && !array_key_exists('db', $node->services))) {
         unset($data['subject']);
         unset($data['content']);
       }

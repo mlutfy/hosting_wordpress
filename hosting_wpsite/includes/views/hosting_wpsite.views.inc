@@ -42,14 +42,14 @@ function hosting_wpsite_views_data() {
     ),
   );
 
-  $data['hosting_wpsite']['platform'] = array(
-   'title' => t('Platform'),
-   'help' => t('Platform'),
+  $data['hosting_wpsite']['wpplatform'] = array(
+   'title' => t('WP Platform'),
+   'help' => t('WP Platform'),
    'relationship' => array(
       'handler' => 'views_handler_relationship',
       'base' => 'node',
       'base field' => 'nid',
-      'label' => t('platform'),
+      'label' => t('wpplatform'),
     ),
   );
 
@@ -257,7 +257,7 @@ function hosting_wpsite_views_pre_build(&$view) {
         // contextual filters (arguments) here.
         // @see: hosting_wpsite_block_view_alter().
         if($node = menu_get_object()) {
-          if (in_array($node->type, array('platform', 'server', 'client', 'package'))) {
+          if (in_array($node->type, array('wpplatform', 'server', 'client'))) {
             foreach ($view->argument as $name => $arg) {
               if (!in_array($node->type, $arg->options['validate_options']['types'])) {
                 unset($view->argument[$name]);
