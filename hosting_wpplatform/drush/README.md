@@ -28,12 +28,7 @@ How to test
 TODO and known bugs
 ===================
 
-* Define WP_CONTENT_DIR in wp-config.php to separate content.
-* Fix having to restart nginx manually after install.
-* Can't run 'verify' on the platform (workaround: edit the platform node and re-save).
-* Site 'verify' loses the database credentials in the vhost config.
-* CiviCRM support? https://github.com/andy-walker/wp-cli-civicrm
-* Better wp-cli alias integration?
+See: https://github.com/mlutfy/hosting_wordpress/issues
 
 How it works
 ============
@@ -48,6 +43,10 @@ How it works
   based on wp-config-sample.php, but uses the vhost variables so that
   we can install multiple sites in the same platform.
 
+CiviCRM
+=======
+
+See: https://drupal.org/project/hosting_civicrm
 
 Support
 =======
@@ -57,8 +56,8 @@ This module is not currently supported. Feel free to send patches using the issu
 Copyright and license
 =====================
 
-Provision Wordpress  
-(C) 2015 Mathieu Lutfy <mathieu@symbiotic.coop>
+Hosting Wordpress  
+(C) 2015-2016 Mathieu Lutfy <mathieu@symbiotic.coop>
 
 Distributed under the terms of the GNU Affero General public license v3 (AGPL).  
 http://www.gnu.org/licenses/agpl.html
