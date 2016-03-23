@@ -22,6 +22,25 @@ function provision_wordpress_drush_init() {
   // FIXME This seems to work better now, but if there are issues,
   // comment this call, and uncomment the other global call.
   provision_wordpress_provision_register_autoload();
+
+  if (d()->type == 'wpsite') {
+    $command = drush_get_command();
+
+    if (empty($command) || ! isset($command['command'])) {
+      return;
+    }
+
+    // Bootstrap WordPress, but for now only if doing a verify.
+    // Some submodules, such as hosting_civicrm, check to see if their plugin is enabled or not.
+    // When doing some commands such as wp-cli, wp-cli takes care of bootstrapping WordPress.
+    //
+    // And for what it's worth, this is probably not the best way to bootstrap WP.
+    // wp-cli has a much more complex wp-settings.php that we should probably use as inspiration.
+    if (in_array($command['command'], array('provision-verify', 'provision-wordpress-verify'))) {
+      $path = d()->root . '/wp-load.php';
+      require_once($path);
+    }
+  }
 }
 
 /**
