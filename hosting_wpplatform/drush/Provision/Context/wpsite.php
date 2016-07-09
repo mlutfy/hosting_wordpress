@@ -9,14 +9,14 @@ class Provision_Context_wpsite extends Provision_Context {
 
   static function option_documentation() {
     return array(
-      'wpplatform' => 'site: the platform the wpsite is run on',
+      'wpplatform' => 'site: the wpplatform the wpsite is run on',
+      'platform' => 'site: the platform the wpsite is run on (compat for Aegir)',
       'db_server' => 'site: the db server the wpsite is run on',
       'uri' => 'site: example.com URI, no http:// or trailing /',
       'language' => 'site: site language; default en',
       'aliases' => 'site: comma-separated URIs',
       'redirection' => 'site: boolean for whether --aliases should redirect; default false',
       'client_name' => 'site: machine name of the client that owns this site',
-      // 'profile' => 'site: Drupal profile to use; default default',
       'drush_aliases' => 'site: Comma-separated list of additional Drush aliases through which this site can be accessed.',
     );
   }
@@ -29,9 +29,10 @@ class Provision_Context_wpsite extends Provision_Context {
 
     parent::init();
 
-    // FIXME I have no idea what I am doing.
+    // FIXME: This is necessary otherwise provision crashes,
+    // but I have no idea why it is necessary.
     $this->is_oid('wpplatform');
-    // $this->is_oid('platform');
+    $this->is_oid('platform');
   }
 
   function init_wpsite() {
@@ -46,11 +47,10 @@ class Provision_Context_wpsite extends Provision_Context {
 
     $this->root = d($this->wpplatform)->root;
 
-    // FIXME: without this, http/db won't work properly?
-    # $platform = new stdClass();
-    # $platform->server = '@server_master';
-
-    // $this->platform = d($this->wpplatform);
+    // Required for provision's http/Provision/Service/http/public.php grant_server_list()
+    // Avoids needing this kind of patch:
+    // https://github.com/mlutfy/hosting_wordpress/commit/5713437a53745a92d0e1003cb5c0f6d8d0934b02#diff-60ccc9b0517a92298f464216ee226795
+    $this->setProperty('platform', $this->wpplatform->name);
 
     // set this because this path is accessed a lot in the code, especially in config files.
     $this->site_path = $this->root . '/sites/' . $this->uri;
