@@ -62,8 +62,7 @@ How to test
 TODO and known bugs
 ===================
 
-* Can't run 'verify' on the platform (workaround: edit the platform node and re-save).
-* CiviCRM support? https://github.com/andy-walker/wp-cli-civicrm
+See: https://github.com/mlutfy/hosting_wordpress/issues
 
 How it works
 ============
@@ -78,13 +77,15 @@ How it works
   based on wp-config-sample.php, but uses the vhost variables so that
   we can install multiple sites in the same platform.
 
+CiviCRM
+=======
+
+See: https://drupal.org/project/hosting_civicrm
+
 Support
 =======
 
 This module is not currently supported. Feel free to send patches using the issue queue on github.
-
-Want to help make this happen? Participate to our crowd-funding campaign:  
-https://crm.symbiotic.coop/civicrm/contribute/transact?id=2
 
 Commercial support is available through Coop SymbioTIC:  
 https://www.symbiotic.coop
@@ -96,7 +97,7 @@ Copyright and license
 =====================
 
 Provision Wordpress  
-(C) 2015 Mathieu Lutfy <mathieu@symbiotic.coop>
+(C) 2015-2016 Mathieu Lutfy <mathieu@symbiotic.coop>
 
 Distributed under the terms of the GNU Affero General public license v3 (AGPL).  
 http://www.gnu.org/licenses/agpl.html
