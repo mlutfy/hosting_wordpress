@@ -46,7 +46,7 @@ Make sure your Aegir user has a ~/.profile file, so that the .bashrc is read whe
 
 Composer adds its 'bin' directory to the $PATH, which makes it possible to use the 'wp' command easily.
 
-Finally, apply the 2 patches included in the patches directory.
+Finally, apply the patche included in the patches directory (until https://www.drupal.org/node/2763509 is merged).
 
 NB: when applying the patches, 'provision' is usually located in /usr/share/drush/commands/, and 'hosting' is in ~/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/.
 
