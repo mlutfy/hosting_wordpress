@@ -17,7 +17,7 @@ function drush_provision_wordpress_cli() {
   // and leave the rest intact.
   do {
     array_shift($GLOBALS['argv']);
-  } while ($GLOBALS['argv'][1] != 'wp');
+  } while (isset($GLOBALS['argv'][1]) && $GLOBALS['argv'][1] != 'wp');
 
   $GLOBALS['argv'][0] = 'wp';
   $GLOBALS['argv'][1] = '--path=' . d()->root . '/';
