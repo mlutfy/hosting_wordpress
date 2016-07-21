@@ -82,6 +82,14 @@ function provision_wordpress_drush_command() {
     'description' => 'Verify WordPress.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
   );
+  $items['provision-wordpress-enable'] = array(
+    'description' => 'Enable a WordPress site',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
+  $items['provision-wordpress-disable'] = array(
+    'description' => 'Disable a WordPress site',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+  );
   $items['provision-wordpress-delete'] = array(
     'description' => 'Delete WordPress.',
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
