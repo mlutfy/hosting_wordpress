@@ -22,38 +22,40 @@ Installation
 
 *IMPORTANT:* run all the following commands as the 'aegir' user ('sudo -i -u aegir' or 'su -c /bin/bash aegir').
 
-Copy the hosting_wordpress module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory:
+Copy the `hosting_wordpress` module in your ~/hostmaster-7.x-3.x/sites/example.org/modules directory:
 
     cd ~/hostmaster-7.x-3.x/sites/example.org/modules/
     git clone https://github.com/mlutfy/hosting_wordpress.git
 
-Enable the hosting_wpplatform and hosting_wpsite modules:
+Enable the `hosting_wpplatform` and `hosting_wpsite` modules:
 
     drush @hostmaster en hosting_wpsite
 
-Run a 'verify' task on the Hostmaster so that Aegir does the magic include in ~/.drush/drushrc.php (c.f. do#2300537):
+Run a 'verify' task on the Hostmaster so that Aegir does the magic include in `~/.drush/drushrc.php` (c.f. do#2300537):
 
     drush @hostmaster provision-verify
 
-Install wp-cli using composer (this should create a sylink in ~/.composer/vendor/bin/wp)
-
-    cd ~/
-    composer global require wp-cli/wp-cli
-
-Make sure your Aegir user has a ~/.profile file, so that the .bashrc is read when using 'sudo -i -u aegir':
+Make sure your Aegir user has a `~/.profile` file, so that the .bashrc is read when using `sudo -i -u aegir`:
 
     cp -i /etc/skel/.profile ~/
 
 Composer adds its 'bin' directory to the $PATH, which makes it possible to use the 'wp' command easily.
 
-Finally, apply the patche included in the patches directory (until https://www.drupal.org/node/2763509 is merged).
+Install `wp-cli` using composer (this should create a sylink in `~/.composer/vendor/bin/wp`)
 
-NB: when applying the patches, 'provision' is usually located in /usr/share/drush/commands/, and 'hosting' is in ~/hostmaster-7.x-3.0-beta1/profiles/hostmaster/modules/aegir/hosting/.
+    cd ~/
+    composer global require wp-cli/wp-cli
+
+Alternatively, if `wp` is not found, add the composer path manually to your `.bashrc`:
+
+    echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> ~/.bashrc
+
+Finally, apply the patch included in the patches directory (until https://www.drupal.org/node/2763509 is merged).
 
 How to test
 ===========
 
-- Create a new platform on your filesystem, ex: mkdir /var/aegir/platforms/wordpress-4.2/; cd /var/aegir/platforms/wordpress-4.2/; wp core download
+- Create a new platform on your filesystem, ex: mkdir /var/aegir/platforms/wordpress-4.5/; cd /var/aegir/platforms/wordpress-4.5/; wp core download
 - Create a new WP Platform (node/add/wpplatform)
 - Create a new WP Site from there.
 - Access the URL of your new site.
