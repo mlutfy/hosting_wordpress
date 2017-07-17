@@ -1,4 +1,4 @@
-name = Sites
+name = WP Sites
 description = Allow Aegir to manage of hosted WP sites.
 package = Hosting
 dependencies[] = hosting
