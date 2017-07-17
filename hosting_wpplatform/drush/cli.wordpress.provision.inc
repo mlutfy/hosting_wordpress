@@ -4,6 +4,11 @@
  * Implements the provision-wordpress-cli command.
  */
 function drush_provision_wordpress_cli() {
+  // Required so that wp-cli finds the civicrm package
+  // however, right now we have symlinks for civicrm to a common place,
+  // but WordPress now has better ways of dealing with this.
+  $_SERVER['wp_content_dir'] = d()->root . '/sites/' . d()->uri . '/wp-content';
+
   // Normally argv will have:
   // 0 = /path/to/drush.php
   // 1 = --php=foo
