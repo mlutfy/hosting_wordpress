@@ -98,6 +98,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
 
   // FIXME: Quick & dirty confs. There is probably a better way.
   $site_path = d()->site_path;
+  $phpfpm_socket_path = Provision_Service_http_nginx::getPhpFpmSocketPath();
 
   $conf = <<<EOF
     fastcgi_param wp_content_dir {$site_path}/wp-content/;
@@ -113,7 +114,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
         return 403;
       }
       try_files    /wp-admin/index.php =404;
-      fastcgi_pass unix:/var/run/php5-fpm.sock;
+      fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
     }
     location ~ /wp-admin/(.*).php\$ {
       tcp_nopush   off;
@@ -123,7 +124,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
         return 403;
       }
       try_files    \$uri =404;
-      fastcgi_pass unix:/var/run/php5-fpm.sock;
+      fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
     }
     location ~ /wp-(.*).php\$ {
       tcp_nopush   off;
@@ -133,7 +134,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
         return 403;
       }
       try_files    \$uri =404;
-      fastcgi_pass unix:/var/run/php5-fpm.sock;
+      fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
     }
     location ~ ^/wp-content/uploads/(.*)\$ {
       try_files /sites/\$main_site_name/wp-content/uploads/\$1 =404;
