@@ -79,6 +79,10 @@ function hosting_wpsite_drush_context_import($context, &$node) {
  * Map values of wpsite node into command line arguments
  */
 function drush_hosting_wpsite_pre_hosting_task($task) {
+  // FIXME This is not implemented yet.
+  // It should also check whether the site is a wpsite.
+  return;
+
   $task = &drush_get_context('HOSTING_TASK');
 
   if ($task->task_type == 'restore') {
