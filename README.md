@@ -50,8 +50,6 @@ Alternatively, if `wp` is not found, add the composer path manually to your `.ba
 
     echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> ~/.bashrc
 
-Finally, apply the patch included in the patches directory (until https://www.drupal.org/node/2763509 is merged).
-
 How to test
 ===========
 
