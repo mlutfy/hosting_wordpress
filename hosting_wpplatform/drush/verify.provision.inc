@@ -109,7 +109,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
     location ~ /wp-admin/\$ {
       tcp_nopush   off;
       keepalive_requests 0;
-      access_log   on;
+      access_log /var/log/nginx/access.log main;
       if (\$is_bot) {
         return 403;
       }
@@ -119,7 +119,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
     location ~ /wp-admin/(.*).php\$ {
       tcp_nopush   off;
       keepalive_requests 0;
-      access_log   on;
+      access_log /var/log/nginx/access.log main;
       if (\$is_bot) {
         return 403;
       }
@@ -129,7 +129,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
     location ~ /wp-(.*).php\$ {
       tcp_nopush   off;
       keepalive_requests 0;
-      access_log   on;
+      access_log /var/log/nginx/access.log main;
       if (\$is_bot) {
         return 403;
       }
