@@ -17,9 +17,6 @@ function drush_provision_wordpress_verify() {
   d()->service_subscribe('http', '@server_master');
   d()->service_subscribe('db', '@server_127.0.0.1');
 
-  // d()->service('db')->create_site_database();
-  // d()->service('http')->create_config('site');
-
   // FIXME .. this relies on something something that might be removed
   // from provision/db/Provision/Service/db.php.
   //
@@ -32,7 +29,21 @@ function drush_provision_wordpress_verify() {
   $_SERVER['db_passwd'] = drush_get_option('db_passwd', NULL, 'site');
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
-  $_SERVER['wp_content_dir'] = drush_get_option('wp_content_dir', NULL, 'site');
+  $_SERVER['wp_content_dir'] = d()->root . '/sites/' . d()->uri . '/wp-content';
+
+  // These options were loaded from the 'site' context, make sure
+  // they get set in the 'wpsite' context, for the drushrc.php refresh.
+  drush_set_option('db_type', $_SERVER['db_type'], 'wpsite');
+  drush_set_option('db_host', $_SERVER['db_host'], 'wpsite');
+  drush_set_option('db_port', $_SERVER['db_port'], 'wpsite');
+  drush_set_option('db_passwd', $_SERVER['db_passwd'], 'wpsite');
+  drush_set_option('db_name', $_SERVER['db_name'], 'wpsite');
+  drush_set_option('db_user', $_SERVER['db_user'], 'wpsite');
+  drush_set_option('wp_content_dir', $_SERVER['wp_content_dir'], 'wpsite');
+
+  // Refresh the drushrc.php
+  $config = new Provision_Config_Drushrc_wpsite(d()->name);
+  $config->write();
 
   // Directory permissions
   provision_wordpress_setup_directories();
