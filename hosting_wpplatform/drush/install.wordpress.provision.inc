@@ -58,6 +58,7 @@ function drush_provision_wordpress_install() {
   drush_set_option('db_passwd', $_SERVER['db_passwd'], 'wpsite');
   drush_set_option('db_name', $_SERVER['db_name'], 'wpsite');
   drush_set_option('db_user', $_SERVER['db_user'], 'wpsite');
+  drush_set_option('wp_content_dir', $_SERVER['wp_content_dir'], 'wpsite');
 
   // And now save the wpsite context to disk (drushrc.php).
   $config = new Provision_Config_Drushrc_wpsite(d()->name);
@@ -69,23 +70,7 @@ function drush_provision_wordpress_install() {
   // Run the WordPress installer
   $admin_email = drush_get_option('client_email', 'fixme@example.org');
 
-/*
-  // Wishful thinking (but this mysteriously fails because wp-cli is not correctly initialized, see wpsite service):
-  WP_CLI::run_command(array('core', 'install'), array(
-    'url' => d()->uri,
-    'title' => d()->uri,
-    'admin_user' => 'admin',
-    'admin_email' => $admin_email,
-    'admin_password' => 'changeme', // FIXME TODO
-  ));
-*/
-
-  // This helps with wp-cli require_maybe() statements
-  global $wp_version;
-
-  $GLOBALS['argv'] = array(
-    'wp',
-    '--path=' . d()->root . '/',
+  $args = [
     'core',
     'install',
     '--url=' . d()->uri,
@@ -93,10 +78,12 @@ function drush_provision_wordpress_install() {
     '--admin_user=admin',
     '--admin_email=' . $admin_email,
     '--admin_password=changeme', // FIXME
-  );
+  ];
 
-  define('WP_CLI_ROOT', '/var/aegir/.composer/vendor/wp-cli/wp-cli');
-  require_once WP_CLI_ROOT . '/php/wp-cli.php';
+  $root = d()->root . '/';
+  $drushrc = d()->root . '/sites/' . d()->uri . '/drushrc.php';
+
+  drush_shell_exec("/var/aegir/.composer/vendor/bin/wp --path=$root --require=$drushrc " . implode(' ', $args));
 
   d()->service('http')->restart();
 

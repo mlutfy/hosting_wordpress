@@ -32,6 +32,7 @@ function drush_provision_wordpress_verify() {
   $_SERVER['db_passwd'] = drush_get_option('db_passwd', NULL, 'site');
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
+  $_SERVER['wp_content_dir'] = drush_get_option('wp_content_dir', NULL, 'site');
 
   // Directory permissions
   provision_wordpress_setup_directories();

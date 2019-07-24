@@ -9,29 +9,36 @@ function drush_provision_wordpress_cli() {
   // but WordPress now has better ways of dealing with this.
   $_SERVER['wp_content_dir'] = d()->root . '/sites/' . d()->uri . '/wp-content';
 
+  // Rebuild a new $args array with the arguments after the 'wp' arg.
   // Normally argv will have:
   // 0 = /path/to/drush.php
   // 1 = --php=foo
   // 2 = --php-options=bar
   // 3 = @fooalias
   // 4 = wp
-  // 5 = info (etc)
-  //
-  // We remove the first arguments until 'wp' is second (the first argument
-  // being wp.phar or whatever), which lets us re-write as 0=wp, 1=--path[..],
-  // and leave the rest intact.
-  do {
-    array_shift($GLOBALS['argv']);
-  } while (isset($GLOBALS['argv'][1]) && $GLOBALS['argv'][1] != 'wp');
+  // 5 = info
+  // 6 = --help (etc)
+  $args = [];
+  $found = false;
 
-  $GLOBALS['argv'][0] = 'wp';
-  $GLOBALS['argv'][1] = '--path=' . d()->root . '/';
+  foreach ($GLOBALS['argv'] as $arg) {
+    if ($found) {
+      $args[] = $arg;
+    }
 
-  // This helps with wp-cli require_maybe() statements
-  global $wp_version;
+    // On the next iteration, start saving arguments into $args
+    if ($arg == 'wp') {
+      $found = true;
+    }
+  }
 
-  // FIXME: this causes drush to exist with:
-  // "Drush command terminated abnormally due to an unrecoverable error."
-  define('WP_CLI_ROOT', '/var/aegir/.composer/vendor/wp-cli/wp-cli');
-  require_once WP_CLI_ROOT . '/php/wp-cli.php';
+  if (empty($args)) {
+    drush_set_error("HOSTING_WPPLATFORM_CLI_ERROR", dt("Could not parse the command line arguments, 'wp' not found."));
+    return;
+  }
+
+  $root = d()->root . '/';
+  $drushrc = d()->root . '/sites/' . d()->uri . '/drushrc.php';
+
+  drush_shell_exec_interactive("/var/aegir/.composer/vendor/bin/wp --path=$root --require=$drushrc " . implode(' ', $args));
 }
