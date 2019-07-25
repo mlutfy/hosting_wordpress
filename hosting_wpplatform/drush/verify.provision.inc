@@ -114,7 +114,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
         return 403;
       }
       try_files    /wp-admin/index.php =404;
-      fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
+      fastcgi_pass unix:{$phpfpm_socket_path};
     }
     location ~ /wp-admin/(.*).php\$ {
       tcp_nopush   off;
@@ -124,7 +124,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
         return 403;
       }
       try_files    \$uri =404;
-      fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
+      fastcgi_pass unix:{$phpfpm_socket_path};
     }
     location ~ /wp-(.*).php\$ {
       tcp_nopush   off;
@@ -134,7 +134,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
         return 403;
       }
       try_files    \$uri =404;
-      fastcgi_pass unix:<?php print $phpfpm_socket_path; ?>;
+      fastcgi_pass unix:{$phpfpm_socket_path};
     }
     location ~ ^/wp-content/uploads/(.*)\$ {
       try_files /sites/\$main_site_name/wp-content/uploads/\$1 =404;
@@ -155,7 +155,7 @@ EOF;
     $lines[] = "    try_files \$uri 404;";
     $lines[] = "  }";
     $lines[] = "\n";
-    return implode("\n", $lines);
+    $conf .= "\n\n" . implode("\n", $lines);
   }
 
   drush_log('WordPress: leaving provision_wordpress_provision_nginx_vhost_config', 'ok');
