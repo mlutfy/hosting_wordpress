@@ -102,6 +102,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
 
   $conf = <<<EOF
     fastcgi_param wp_content_dir {$site_path}/wp-content/;
+    fastcgi_param CIVICRM_SETTINGS {$site_path}/wp-content/uploads/civicrm/civicrm.settings.php';
 
     ###
     ### Allow some known php files.
