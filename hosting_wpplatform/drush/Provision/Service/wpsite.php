@@ -34,7 +34,7 @@ class Provision_Service_wpsite extends Provision_Service {
       include($filename);
 
       // This is necessary for deleting the DB in delete.wordpress.provision.inc
-      foreach (array('db_type', 'db_host', 'db_port', 'db_passwd', 'db_name', 'db_user', 'wp_content_dir') as $x) {
+      foreach (array('db_type', 'db_host', 'db_port', 'db_passwd', 'db_name', 'db_user', 'wp_content_dir', 'wp_content_url') as $x) {
         drush_set_option($x, $options[$x], 'site');
       }
     }

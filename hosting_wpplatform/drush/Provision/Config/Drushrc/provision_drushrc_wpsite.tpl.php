@@ -11,7 +11,7 @@ print "<?php \n"; ?>
 ?>
 
 # Aegir additions
-<?php foreach (array('db_type', 'db_port', 'db_host', 'db_user', 'db_passwd', 'db_name', 'wp_content_dir') as $key) { ?>
+<?php foreach (array('db_type', 'db_port', 'db_host', 'db_user', 'db_passwd', 'db_name', 'wp_content_dir', 'wp_content_url') as $key) { ?>
 $_SERVER['<?php print $key; ?>'] = $options['<?php print $key; ?>'];
 <?php } ?>
 # local non-aegir-generated additions

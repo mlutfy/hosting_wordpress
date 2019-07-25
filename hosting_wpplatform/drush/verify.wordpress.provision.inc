@@ -31,6 +31,17 @@ function drush_provision_wordpress_verify() {
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
   $_SERVER['wp_content_dir'] = d()->root . '/sites/' . d()->uri . '/wp-content';
 
+  // This makes the assumption that if LetsEncrypt is enabled on the web server,
+  // the site will very soon be https-enabled.
+  $server = d()->wpplatform->web_server;
+
+  if (($server->Certificate_service_type == 'LetsEncrypt')) {
+    $_SERVER['wp_content_url'] = 'https://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
+  }
+  else {
+    $_SERVER['wp_content_url'] = 'http://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
+  }
+
   // These options were loaded from the 'site' context, make sure
   // they get set in the 'wpsite' context, for the drushrc.php refresh.
   drush_set_option('db_type', $_SERVER['db_type'], 'wpsite');
@@ -40,6 +51,7 @@ function drush_provision_wordpress_verify() {
   drush_set_option('db_name', $_SERVER['db_name'], 'wpsite');
   drush_set_option('db_user', $_SERVER['db_user'], 'wpsite');
   drush_set_option('wp_content_dir', $_SERVER['wp_content_dir'], 'wpsite');
+  drush_set_option('wp_content_url', $_SERVER['wp_content_url'], 'wpsite');
 
   // Refresh the drushrc.php
   $config = new Provision_Config_Drushrc_wpsite(d()->name);

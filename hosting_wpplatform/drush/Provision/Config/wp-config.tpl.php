@@ -40,6 +40,7 @@ define('DB_HOST', $_SERVER['db_host']);
 
 /** Content directory */
 define('WP_CONTENT_DIR', $_SERVER['wp_content_dir']);
+define('WP_CONTENT_URL', $_SERVER['wp_content_url']);
 
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8');
