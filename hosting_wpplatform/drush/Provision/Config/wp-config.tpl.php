@@ -48,6 +48,9 @@ define('DB_CHARSET', 'utf8');
 /** The Database Collate type. Don't change this if in doubt. */
 define('DB_COLLATE', '');
 
+/** Required by CiviCRM extensions */
+define('CIVICRM_CMSDIR', '<?php print $this->root; ?>');
+
 /**#@+
  * Authentication Unique Keys and Salts.
  *
