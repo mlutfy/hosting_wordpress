@@ -60,14 +60,20 @@ define('CIVICRM_CMSDIR', '<?php print $this->root; ?>');
  *
  * @since 2.6.0
  */
-define('AUTH_KEY',         'put your unique phrase here');
-define('SECURE_AUTH_KEY',  'put your unique phrase here');
-define('LOGGED_IN_KEY',    'put your unique phrase here');
-define('NONCE_KEY',        'put your unique phrase here');
-define('AUTH_SALT',        'put your unique phrase here');
-define('SECURE_AUTH_SALT', 'put your unique phrase here');
-define('LOGGED_IN_SALT',   'put your unique phrase here');
-define('NONCE_SALT',       'put your unique phrase here');
+if (file_exists($_SERVER['wp_content_dir'] . '/../wp-config.php')) {
+  require_once $_SERVER['wp_content_dir'] . '/../wp-config.php';
+}
+
+if (!defined('AUTH_KEY')) {
+  define('AUTH_KEY',         'put your unique phrase here');
+  define('SECURE_AUTH_KEY',  'put your unique phrase here');
+  define('LOGGED_IN_KEY',    'put your unique phrase here');
+  define('NONCE_KEY',        'put your unique phrase here');
+  define('AUTH_SALT',        'put your unique phrase here');
+  define('SECURE_AUTH_SALT', 'put your unique phrase here');
+  define('LOGGED_IN_SALT',   'put your unique phrase here');
+  define('NONCE_SALT',       'put your unique phrase here');
+}
 
 /**#@-*/
 
