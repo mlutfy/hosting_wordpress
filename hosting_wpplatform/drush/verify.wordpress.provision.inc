@@ -17,6 +17,11 @@ function drush_provision_wordpress_verify() {
   d()->service_subscribe('http', '@server_master');
   d()->service_subscribe('db', '@server_127.0.0.1');
 
+  // This makes the assumption that if LetsEncrypt is enabled on the web server,
+  // the site will very soon be https-enabled.
+  $server = d()->wpplatform->web_server;
+  $protocol = ($server->Certificate_service_type == 'LetsEncrypt' ? 'https' : 'http');
+
   // FIXME .. this relies on something something that might be removed
   // from provision/db/Provision/Service/db.php.
   //
@@ -30,17 +35,7 @@ function drush_provision_wordpress_verify() {
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
   $_SERVER['wp_content_dir'] = d()->root . '/sites/' . d()->uri . '/wp-content';
-
-  // This makes the assumption that if LetsEncrypt is enabled on the web server,
-  // the site will very soon be https-enabled.
-  $server = d()->wpplatform->web_server;
-
-  if (($server->Certificate_service_type == 'LetsEncrypt')) {
-    $_SERVER['wp_content_url'] = 'https://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
-  }
-  else {
-    $_SERVER['wp_content_url'] = 'http://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
-  }
+  $_SERVER['wp_content_url'] = $protocol . '://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
 
   // These options were loaded from the 'site' context, make sure
   // they get set in the 'wpsite' context, for the drushrc.php refresh.
@@ -59,6 +54,14 @@ function drush_provision_wordpress_verify() {
 
   // Directory permissions
   provision_wordpress_setup_directories();
+
+  // URLs that change when migrating sites, for example
+  // FIXME: Presumably there are valid use-cases for setting this to something more custom?
+  // should we preg_replace?
+  $url = $protocol . '://' . d()->uri;
+  provision_wordpress_wpcli_run("option update home $url");
+  provision_wordpress_wpcli_run("option update siteurl $url");
+  drush_log(dt('WordPress: home and siteurl set to :url', [':url' => $url]), 'ok');
 
   // This makes the assumption that if an https key is available, then we are
   // going to require https. This means we can install a site, run dehydrated manually,

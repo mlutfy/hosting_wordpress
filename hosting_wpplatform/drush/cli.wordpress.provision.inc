@@ -23,7 +23,7 @@ function drush_provision_wordpress_cli() {
 
   foreach ($GLOBALS['argv'] as $arg) {
     if ($found) {
-      $args[] = $arg;
+      $args[] = escapeshellarg($arg);
     }
 
     // On the next iteration, start saving arguments into $args
@@ -37,8 +37,6 @@ function drush_provision_wordpress_cli() {
     return;
   }
 
-  $root = d()->root . '/';
-  $drushrc = d()->root . '/sites/' . d()->uri . '/drushrc.php';
-
-  drush_shell_exec_interactive("/var/aegir/.composer/vendor/bin/wp --path=$root --require=$drushrc " . implode(' ', $args));
+  $args = implode(' ', $args);
+  provision_wordpress_wpcli_run($args);
 }

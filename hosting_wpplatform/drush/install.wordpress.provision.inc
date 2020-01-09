@@ -91,10 +91,8 @@ function drush_provision_wordpress_install() {
     '--admin_password=changeme', // FIXME
   ];
 
-  $root = d()->root . '/';
-  $drushrc = d()->root . '/sites/' . d()->uri . '/drushrc.php';
-
-  drush_shell_exec("/var/aegir/.composer/vendor/bin/wp --path=$root --require=$drushrc " . implode(' ', $args));
+  $args = implode(' ', $args);
+  provision_wordpress_wpcli_run($args);
 
   d()->service('http')->restart();
 
