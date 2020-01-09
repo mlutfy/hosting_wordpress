@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ *
  */
 function drush_provision_wordpress_verify_validate() {
 }
@@ -60,6 +60,17 @@ function drush_provision_wordpress_verify() {
   // Directory permissions
   provision_wordpress_setup_directories();
 
+  // This makes the assumption that if an https key is available, then we are
+  // going to require https. This means we can install a site, run dehydrated manually,
+  // then run provision-wordpress-verify to regenerate the vhost.
+  if (file_exists('/var/aegir/config/letsencrypt.d/' . d()->uri . '/privkey.pem')) {
+    // https_key is not really used, only in an "if" of the tpl
+    d()->https_key = d()->uri;
+    d()->context->https_enabled = 2;
+    d()->https_cert_ok = true;
+  }
+
+  d()->service('http')->create_config('site');
   d()->service('http')->restart();
 
   drush_log('WordPress: finished drush_provision_wordpress_verify', 'ok');
