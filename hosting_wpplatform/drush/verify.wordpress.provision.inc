@@ -71,6 +71,11 @@ function drush_provision_wordpress_verify() {
     d()->https_key = d()->uri;
     d()->context->https_enabled = 2;
     d()->https_cert_ok = true;
+
+    # For now, only provision_symbiotic understand this (on nginx)
+    # The default aegir tpl looks for a global $ssl_redirection, and
+    # I'm not sure how to fix that (probably requires a WP 'service').
+    d()->ssl_redirection = true;
   }
 
   d()->service('http')->create_config('site');
