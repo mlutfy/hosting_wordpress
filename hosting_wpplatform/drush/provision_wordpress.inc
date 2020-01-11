@@ -52,5 +52,5 @@ function provision_wordpress_wpcli_run(String $args) {
   $root = d()->root . '/';
   $drushrc = d()->root . '/sites/' . d()->uri . '/drushrc.php';
 
-  drush_shell_exec_interactive("/var/aegir/.composer/vendor/bin/wp --path=$root --require=$drushrc $args");
+  drush_shell_exec_interactive("wp --path=$root --require=$drushrc $args");
 }
