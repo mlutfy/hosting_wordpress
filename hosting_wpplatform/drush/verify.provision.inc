@@ -141,14 +141,14 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
     location ~ ^/wp-content/uploads/(.*)\$ {
       try_files /sites/\$main_site_name/wp-content/uploads/\$1 =404;
     }
-    location ~ ^/sites/eausecours.org/wp-content/plugins/civicrm/civicrm/extern/(.*).php$ {
+    location ~ ^/sites/$uri/wp-content/plugins/civicrm/civicrm/extern/(.*).php$ {
       tcp_nopush   off;
       keepalive_requests 0;
       access_log /var/log/nginx/access.log main;
-      if ($is_bot) {
+      if (\$is_bot) {
         return 403;
       }
-      try_files    $uri =404;
+      try_files    \$uri =404;
       fastcgi_pass unix:{$phpfpm_socket_path};
     }
 
