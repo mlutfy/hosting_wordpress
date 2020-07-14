@@ -138,8 +138,8 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
       try_files    \$uri =404;
       fastcgi_pass unix:{$phpfpm_socket_path};
     }
-    location ~ ^/wp-content/uploads/(.*)\$ {
-      try_files /sites/\$main_site_name/wp-content/uploads/\$1 =404;
+    location ~ ^/wp-content/(.*)\$ {
+      try_files /sites/\$main_site_name/wp-content/\$1 =404;
     }
 
 EOF;
