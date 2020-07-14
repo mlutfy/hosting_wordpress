@@ -40,15 +40,9 @@ function provision_wordpress_setup_directories() {
 
   // Symlink the twentyfifteen theme directory for now,
   // until we figure how to share themes/plugins?
-  $exists = provision_file()->exists($wp_content_dir . '/themes/twentyfifteen')
-    ->succeed('WordPress: @path exists.')
-    ->status();
-
-  if (! $exists) {
-    provision_file()->symlink(d()->root . '/wp-content/themes/twentyfifteen', $wp_content_dir . '/themes/twentyfifteen')
-      ->succeed('Created symlink @path to @target')
-      ->fail('Could not create symlink @path to @target: @reason');
-  }
+  provision_file()->symlink(d()->root . '/wp-content/themes/twentytwenty', $wp_content_dir . '/themes/twentytwenty')
+    ->succeed('Created symlink @path to @target')
+    ->fail('Could not create symlink @path to @target: @reason');
 }
 
 /**
@@ -58,5 +52,5 @@ function provision_wordpress_wpcli_run(String $args) {
   $root = d()->root . '/';
   $drushrc = d()->root . '/sites/' . d()->uri . '/drushrc.php';
 
-  drush_shell_exec_interactive("/var/aegir/.composer/vendor/bin/wp --path=$root --require=$drushrc $args");
+  drush_shell_exec_interactive("wp --path=$root --require=$drushrc $args");
 }

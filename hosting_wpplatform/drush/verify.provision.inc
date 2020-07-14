@@ -103,7 +103,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
   $conf = <<<EOF
     fastcgi_param wp_content_dir {$site_path}/wp-content/;
     fastcgi_param wp_content_url http://$uri/sites/$uri/wp-content/;
-    fastcgi_param CIVICRM_SETTINGS {$site_path}/wp-content/uploads/civicrm/civicrm.settings.php';
+    fastcgi_param CIVICRM_SETTINGS '{$site_path}/wp-content/uploads/civicrm/civicrm.settings.php';
 
     ###
     ### Allow some known php files.
@@ -140,6 +140,16 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
     }
     location ~ ^/wp-content/(.*)\$ {
       try_files /sites/\$main_site_name/wp-content/\$1 =404;
+    }
+    location ~ ^/sites/$uri/wp-content/plugins/civicrm/civicrm/extern/(.*).php$ {
+      tcp_nopush   off;
+      keepalive_requests 0;
+      access_log /var/log/nginx/access.log main;
+      if (\$is_bot) {
+        return 403;
+      }
+      try_files    \$uri =404;
+      fastcgi_pass unix:{$phpfpm_socket_path};
     }
 
 EOF;
