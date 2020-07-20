@@ -6,19 +6,21 @@
 function provision_wordpress_setup_directories() {
   $wp_content_dir = d()->site_path . '/wp-content';
 
-  $content_dirs = array(
+  $content_dirs = [
+    d()->site_path,
     $wp_content_dir,
+    $wp_content_dir . '/languages',
     $wp_content_dir . '/plugins',
     $wp_content_dir . '/themes',
     $wp_content_dir . '/uploads',
-  );
+  ];
 
   foreach ($content_dirs as $dir) {
     $exists = provision_file()->exists($dir)
       ->succeed('WordPress: @path exists.')
       ->status();
 
-    if (! $exists) {
+    if (!$exists) {
       $exists = provision_file()->mkdir($dir)
         ->succeed('Wordpress: @path has been created.')
         ->fail('CiviCRM: @path could not be created.', 'DRUSH_PERM_ERROR')
@@ -27,7 +29,7 @@ function provision_wordpress_setup_directories() {
 
     // setgid directories, it avoids a few permissions issues
     // where files are aegir.www-data.
-    provision_file()->chmod($dir, 02770, TRUE)
+    provision_file()->chmod($dir, 02750, TRUE)
       ->succeed('Changed permissions of @path to @perm')
       ->fail('Could not change permissions <code>@path to @perm')
       ->status();
@@ -35,6 +37,19 @@ function provision_wordpress_setup_directories() {
     provision_file()->chgrp($dir, d('@server_master')->web_group, TRUE)
       ->succeed('Changed group ownership @path to @gid')
       ->fail('Could not change group ownership of @path to @gid')
+      ->status();
+  }
+
+  // Directories writable by www-data
+  $writable_dirs = [
+    $wp_content_dir . '/languages',
+    $wp_content_dir . '/uploads',
+  ];
+
+  foreach ($writable_dirs as $dir) {
+    provision_file()->chmod($dir, 02770, TRUE)
+      ->succeed('Changed permissions of @path to @perm')
+      ->fail('Could not change permissions <code>@path to @perm')
       ->status();
   }
 
