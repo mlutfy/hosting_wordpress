@@ -57,7 +57,7 @@ function provision_wordpress_provision_apache_vhost_config($uri, $data) {
 
     RewriteEngine On
 
-    SetEnv wp_content_dir {$site_path}/wp-content/
+    SetEnv wp_content_dir {$site_path}/wp-content
     RewriteRule ^/wp-content/(.*)$ /sites/{$site_name}/wp-content/$1 [QSA,L]
 
     <Directory $platform_root>
@@ -96,13 +96,14 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
 
   drush_log('WordPress: hello from provision_wordpress_provision_nginx_vhost_config', 'ok');
 
-  // FIXME: Quick & dirty confs. There is probably a better way.
+  // FIXME: Quick & dirty confs. Duplicates bits from {verify,install}.wordpress.provision.inc
   $site_path = d()->site_path;
   $phpfpm_socket_path = Provision_Service_http_nginx::getPhpFpmSocketPath();
+  $protocol = ($server->Certificate_service_type == 'LetsEncrypt' ? 'https' : 'http');
 
   $conf = <<<EOF
-    fastcgi_param wp_content_dir {$site_path}/wp-content/;
-    fastcgi_param wp_content_url http://$uri/sites/$uri/wp-content/;
+    fastcgi_param wp_content_dir {$site_path}/wp-content;
+    fastcgi_param wp_content_url {$protocol}://$uri/sites/$uri/wp-content;
     fastcgi_param CIVICRM_SETTINGS '{$site_path}/wp-content/uploads/civicrm/civicrm.settings.php';
 
     ###
@@ -160,7 +161,7 @@ EOF;
       ':path' => $challenge_path,
     )));
 
-    $lines = array();
+    $lines = [];
     $lines[] = "  # Allow access to letsencrypt.org ACME challenges directory.";
     $lines[] = "  location ^~ /.well-known/acme-challenge {";
     $lines[] = "    alias {$challenge_path};";

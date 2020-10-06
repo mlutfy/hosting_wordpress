@@ -35,7 +35,7 @@ function drush_provision_wordpress_verify() {
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
   $_SERVER['wp_content_dir'] = d()->root . '/sites/' . d()->uri . '/wp-content';
-  $_SERVER['wp_content_url'] = $protocol . '://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
+  $_SERVER['wp_content_url'] = $protocol . '://' . d()->uri . '/sites/' . d()->uri . '/wp-content';
 
   // These options were loaded from the 'site' context, make sure
   // they get set in the 'wpsite' context, for the drushrc.php refresh.

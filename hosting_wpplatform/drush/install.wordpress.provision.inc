@@ -36,6 +36,11 @@ function drush_provision_wordpress_install() {
   d()->service('db')->create_site_database();
   d()->service('http')->create_config('site');
 
+  // This makes the assumption that if LetsEncrypt is enabled on the web server,
+  // the site will very soon be https-enabled.
+  $server = d()->wpplatform->web_server;
+  $protocol = ($server->Certificate_service_type == 'LetsEncrypt' ? 'https' : 'http');
+
   // FIXME .. this relies on something something that might be removed
   // from provision/db/Provision/Service/db.php.
   //
@@ -48,18 +53,8 @@ function drush_provision_wordpress_install() {
   $_SERVER['db_passwd'] = drush_get_option('db_passwd', NULL, 'site');
   $_SERVER['db_name'] = drush_get_option('db_name', NULL, 'site');
   $_SERVER['db_user'] = drush_get_option('db_user', NULL, 'site');
-  $_SERVER['wp_content_dir'] = d()->site_path . '/wp-content/';
-
-  // This makes the assumption that if LetsEncrypt is enabled on the web server,
-  // the site will very soon be https-enabled.
-  $server = d()->wpplatform->web_server;
-
-  if (($server->Certificate_service_type == 'LetsEncrypt')) {
-    $_SERVER['wp_content_url'] = 'https://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
-  }
-  else {
-    $_SERVER['wp_content_url'] = 'http://' . d()->uri . '/sites/' . d()->uri . '/wp-content/';
-  }
+  $_SERVER['wp_content_dir'] = d()->site_path . '/wp-content';
+  $_SERVER['wp_content_url'] = $protocol . '://' . d()->uri . '/sites/' . d()->uri . '/wp-content';
 
   // Then we add it in the wpsite context
   drush_set_option('db_type', $_SERVER['db_type'], 'wpsite');
