@@ -108,8 +108,23 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
 
 EOF;
 
-  if (function_exists('provision_customhtaccess_provision_nginx_vhost_config')) {
-    $conf .= provision_customhtaccess_provision_nginx_vhost_config($uri);
+  // Duplicates from provision_customhtaccess
+  // not sure how to autoload with Aegir.
+  $custom_nginx_config = "$site_path/nginx-custom.conf";
+
+  if (file_exists($custom_nginx_config)) {
+    drush_log(dt("WordPress vhost: including :config", [
+      ':config' => $custom_nginx_config,
+    ]));
+
+    // Block access to the nginx-custom.conf file
+    // It is a configuration file that is not meant to be public.
+    $conf .= "\n"
+      . "    location ~* ^/sites/.*/nginx-custom.conf {\n"
+      . "      deny all;\n"
+      . "    }\n\n";
+
+    $conf .= "    include " . $custom_nginx_config . ";\n\n";
   }
 
   $conf .= <<<EOF

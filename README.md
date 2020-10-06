@@ -12,7 +12,7 @@ Requirements
 ============
 
 * Operating system: Debian GNU/Linux Jessie 8.x
-* Web server: nginx or Apache 2.4+
+* Web server: nginx (Apache might work, but not well tested)
 * Aegir 3 (7.x-3.x)
 
 Other environments are non-tested and may not work (but you are most welcomed to debug it and send a patch).
@@ -50,6 +50,19 @@ Alternatively, if `wp` is not found, add the composer path manually to your `.ba
 
     echo 'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> ~/.bashrc
 
+Warning
+=======
+
+Because of limitations in the integration with `provision_customhtaccess` (which lets developers inject
+custom rules in their nginx configuration), this module assumes that you trust the developers who have
+access to the site-specific directory of their site.
+
+If a file called `sites/example.org/nginx-custom.conf` exists, it will be
+included by the nginx configuration.
+
+An incorrect nginx configuration can cause problems with restarting nginx, potentially provide a path
+towards privilege escalation, etc.
+
 How to test
 ===========
 
@@ -59,8 +72,8 @@ How to test
 - Access the URL of your new site.
 - You can also use wp-cli in a site context, using, for example: "drush @mysite.example.org wp user list"
 
-TODO and known bugs
-===================
+Known issues
+============
 
 See: https://github.com/mlutfy/hosting_wordpress/issues
 
