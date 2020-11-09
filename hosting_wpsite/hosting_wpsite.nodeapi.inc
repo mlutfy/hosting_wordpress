@@ -96,6 +96,13 @@ function hosting_wpsite_view(&$node, $teaser = FALSE) {
     );
   }
 
+  // Support hosting_alias
+  if (function_exists('hosting_alias_node_view')) {
+    $node->type = 'site';
+    hosting_alias_node_view($node, 'full', 'xx');
+    $node->type = 'wpsite';
+  }
+
   $node->content['info']['#suffix'] = '</div>';
 
   if ($node->nid) {
@@ -152,6 +159,10 @@ function hosting_wpsite_nodeapi_wpsite_presave(&$node) {
  * Implements hook_insert().
  */
 function hosting_wpsite_insert(&$node) {
+  if ($node->type != 'wpsite') {
+    return;
+  }
+
   $client = hosting_get_client($node->client);
   $node->client = $client->nid;
   $node->wpsite_language = isset($node->wpsite_language) ? $node->wpsite_language : 'en';
@@ -179,6 +190,9 @@ function hosting_wpsite_insert(&$node) {
     ))
     ->execute();
 
+  if (function_exists('hosting_alias_insert')) {
+    hosting_alias_insert($node);
+  }
 }
 
 /**
@@ -229,6 +243,10 @@ function hosting_wpsite_update(&$node) {
       ->condition('vid', $node->vid)
       ->execute();
   }
+
+  if (function_exists('hosting_alias_update')) {
+    hosting_alias_update($node);
+  }
 }
 
 /**
@@ -247,9 +265,19 @@ function hosting_wpsite_node_update($node) {
  */
 function hosting_wpsite_load($nodes) {
   foreach ($nodes as $nid => &$node) {
-    $additions = db_query('SELECT  client, db_server, db_name, wpplatform, profile, language as wpsite_language, last_cron, cron_key, status AS wpsite_status, verified FROM {hosting_wpsite} WHERE vid = :vid', array(':vid' => $node->vid))->fetch();
-    foreach ($additions as $property => &$value) {
-      $node->$property = $value;
+    if ($node->type == 'wpsite') {
+      $additions = db_query('SELECT  client, db_server, db_name, wpplatform, profile, language as wpsite_language, last_cron, cron_key, status AS wpsite_status, verified FROM {hosting_wpsite} WHERE vid = :vid', array(':vid' => $node->vid))->fetch();
+      foreach ($additions as $property => &$value) {
+        $node->$property = $value;
+      }
+
+      if (function_exists('hosting_alias_get_aliases')) {
+        // Copied from hosting_alias.module function hosting_alias_node_load().
+        $nodes[$nid]->redirection = db_query("SELECT redirection FROM {hosting_site_alias} WHERE vid = :vid", array(':vid' => $node->vid))->fetchField();
+        // Only retrieves custom aliases, as they are all that can be modified.
+        $nodes[$nid]->aliases = hosting_alias_get_aliases($node, HOSTING_ALIAS_CUSTOM);
+        $nodes[$nid]->aliases_automatic = hosting_alias_get_aliases($node, HOSTING_ALIAS_AUTOMATIC);
+      }
     }
   }
 }
