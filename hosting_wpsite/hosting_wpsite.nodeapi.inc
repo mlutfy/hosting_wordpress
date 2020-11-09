@@ -256,6 +256,7 @@ function hosting_wpsite_node_update($node) {
   if ($node->type == "wpsite") {
     if ((isset($node->no_verify) && $node->no_verify) == FALSE) {
       hosting_add_task($node->nid, 'verify');
+      hosting_add_task($node->nid, 'wordpress-verify');
     }
   }
 }
