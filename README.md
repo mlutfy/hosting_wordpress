@@ -11,11 +11,11 @@ See: https://www.drupal.org/node/1044692
 Requirements
 ============
 
-* Operating system: Debian GNU/Linux Jessie 8.x
-* Web server: nginx (Apache might work, but not well tested)
 * Aegir 3 (7.x-3.x)
+* Web server: nginx (Apache might work, but not well tested)
 
-Other environments are non-tested and may not work (but you are most welcomed to debug it and send a patch).
+The [provision_symbiotic](https://github.com/coopsymbiotic/provision_symbiotic) module is recommended.
+It provides a few workarounds for the nginx vhost template.
 
 Installation
 ============
