@@ -43,7 +43,7 @@ function provision_wordpress_drush_init() {
   }
 }
 
-function drush_hosting_wordpress_pre_hosting_task() {
+function drush_provision_wordpress_pre_hosting_task() {
   if (module_exists('hosting_alias')) {
     $task = &drush_get_context('HOSTING_TASK');
     if ($task->ref->type == 'wpsite' && function_exists('hosting_alias_get_aliases')) {
@@ -62,7 +62,7 @@ function drush_hosting_wordpress_pre_hosting_task() {
  *
  * If we're importing a site, then import the aliases and redirection values.
  */
-function hosting_wordpress_drush_context_import($context, &$node) {
+function hosting_provision_drush_context_import($context, &$node) {
   if ($context->type == 'wpsite') {
     // Copied from hosting_alias
     if (function_exists('hosting_alias_get_aliases')) {

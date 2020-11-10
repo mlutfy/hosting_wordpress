@@ -17,6 +17,10 @@ Requirements
 The [provision_symbiotic](https://github.com/coopsymbiotic/provision_symbiotic) module is recommended.
 It provides a few workarounds for the nginx vhost template.
 
+The [aegir_ansible](https://www.drupal.org/project/aegir_ansible) module is recommended if using https.
+This module will automatically write a domains-wp.txt file to regenerate https certificates with letsencrypt.
+Currently a cron is not automatically setup. See the https section below.
+
 Installation
 ============
 
@@ -90,6 +94,47 @@ How it works
   based on wp-config-sample.php, but uses the vhost variables so that
   we can install multiple sites in the same platform.
 
+Https
+=====
+
+This module works a bit differently from `hosting_https`. It still assumes that the
+module has been enabled and is used on the main Aegir frontend, but works more closely
+to how [dehydrated](https://github.com/dehydrated-io/dehydrated/) works.
+
+As an admin, to enable https on a site:
+
+* Make sure that "hosting https" is enabled on the Aegir frontend (i.e. you can access your
+  aegir instance with https, ex: https://aegir.example.org).
+* Create a new WordPress site.
+* Run 'Verify' on the new site (eventually this will run automatically).
+
+Technically:
+
+* When sites are verified, it checks if an https certificate is already available.
+  If so, it assumes that the vhost supports and redirects to https.
+* If the 'aegir ansible' module is installed, it fetches a list of sites (and aliases)
+  from the inventory and writes a 'domains-wp.txt' file in `/var/aegir/config/letsencrypt/`.
+* If 'hosting_https' seems to be enabled (well, if the above directory exists), it will
+  assume that sites must be https, and will generate a certificate for it.
+
+You can then configure a cron to run daily:
+
+```
+/var/aegir/config/letsencrypt/script -c -f /var/aegir/config/letsencrypt/config-wp
+```
+
+You can also run the above to debug if a certificate is not renewing correcly.
+
+The config-wp file should be generated if empty. If not, you can create it manually:
+
+```
+WELLKNOWN="/var/aegir/config/letsencrypt.d/well-known/acme-challenge"
+DOMAINS_TXT="/var/aegir/config/letsencrypt/domains-wp.txt"
+PARAM_CERTDIR="/var/aegir/config/letsencrypt.d/"
+```
+
+This module will also attempt to run dehydrated when a new site is created, using the above command.
+
 CiviCRM
 =======
 
@@ -98,19 +143,16 @@ See: https://drupal.org/project/hosting_civicrm
 Support
 =======
 
-This module is not currently supported. Feel free to send patches using the issue queue on github.
+Feel free to send patches using the issue queue on Github.
 
 Commercial support is available through Coop SymbioTIC:  
 https://www.symbiotic.coop
-
-Or contact one of the Aegir service providers:  
-https://www.drupal.org/project/hosting
 
 Copyright and license
 =====================
 
 Provision Wordpress  
-(C) 2015-2016 Mathieu Lutfy <mathieu@symbiotic.coop>
+(C) 2015-2020 Mathieu Lutfy <mathieu@symbiotic.coop>
 
 Distributed under the terms of the GNU Affero General public license v3 (AGPL).  
 http://www.gnu.org/licenses/agpl.html
