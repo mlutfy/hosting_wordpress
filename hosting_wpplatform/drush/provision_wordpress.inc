@@ -113,7 +113,7 @@ function provision_wordpress_update_domainstxt() {
   if (!file_exists('/var/aegir/config/letsencrypt/config-wp')) {
     $fp = fopen('/var/aegir/config/letsencrypt/config-wp', 'w');
     fwrite($fp, 'WELLKNOWN="/var/aegir/config/letsencrypt.d/well-known/acme-challenge"' . "\n"
-      . 'DOMAINS_TXT="/var/aegir/config/letsencrypt/domains-wp.txt"'
+      . 'DOMAINS_TXT="/var/aegir/config/letsencrypt/domains-wp.txt"' . "\n"
       . 'PARAM_CERTDIR="/var/aegir/config/letsencrypt.d/"' . "\n");
     fclose($fp);
   }
