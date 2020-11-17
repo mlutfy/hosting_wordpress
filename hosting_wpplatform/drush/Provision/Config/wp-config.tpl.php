@@ -25,6 +25,29 @@ print "<?php \n";
  * @package WordPress
  */
 
+/**
+ * Aegir-specific - Adds support for using civix and cv from the CLI.
+ *
+ * It will traverse the directory hierarchy up from the current working directory
+ * looking for a drushrc.php file. It also looks for a wp-config.php file, to avoid
+ * going higher than the site root.
+ */
+if (php_sapi_name() == "cli") {
+  $directory = getcwd();
+
+  while (dirname($directory) != '/') {
+    if (file_exists($directory . '/drushrc.php')) {
+      require_once($directory . '/drushrc.php');
+      break;
+    }
+    if (file_exists($directory . '/wp-config.php')) {
+      break;
+    }
+
+    $directory = dirname(dirname($directory . '/../'));
+  }
+}
+
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
 define('DB_NAME', $_SERVER['db_name']);
