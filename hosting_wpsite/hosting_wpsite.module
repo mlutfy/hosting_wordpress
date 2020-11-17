@@ -499,10 +499,28 @@ function hosting_wpsite_count($wpplatform = NULL, $statuses = NULL) {
 
 /**
  * Retrieve sites on a specific wpplatform, with a specific status
+ *
+ * @param $platform
+ *   (optional) A platform nid, get sites only on a specific platform
+ * @param $status
+ *   (optional) A site status.
  */
-function hosting_get_wpsites_by_status($wpplatform, $status) {
+function hosting_get_wpsites_by_status($wpplatform = null, $status = null) {
   $nodes = array();
-  $result = db_query("SELECT nid FROM {hosting_wpsite} WHERE wpplatform = :wpplatform AND status = :status", array(':wpplatform' => $wpplatform, ':status' => $status));
+
+  $query = db_select('hosting_wpsite')
+    ->fields('hosting_wpsite', array('nid'));
+
+  if ($status) {
+    $query->condition('status', $status);
+  }
+
+  if ($wpplatform) {
+    $query->condition('wpplatform', $wpplatform);
+  }
+
+  $result = $query->execute();
+
   while ($nid = $result->fetch()) {
     $nodes[$nid->nid] = node_load($nid->nid);
   }
@@ -827,4 +845,38 @@ function hosting_wpsite_task_menu_access($node, $task) {
   }
 
   return FALSE;
+}
+
+/**
+ * Implements hook_ansible_inventory_alter from the 'aegir_ansible' module
+ *
+ * @see https://www.drupal.org/project/aegir_ansible/
+ */
+function hosting_wpsite_ansible_inventory_alter(&$inventory) {
+  $inventory->wordpress_sites = [
+    'hosts' => [],
+    'vars' => [
+      'ansible_ssh_host' => 'localhost',
+    ],
+  ];
+
+  $sites = hosting_get_wpsites_by_status(null, HOSTING_WPSITE_ENABLED);
+
+  foreach ($sites as $node) {
+    $aliases = [];
+    $redirection = 0;
+
+    if (function_exists('hosting_alias_get_aliases')) {
+      $aliases = hosting_alias_get_aliases($node);
+      $redirection = db_query("SELECT redirection FROM {hosting_site_alias} WHERE vid = :vid", array(':vid' => $node->vid))->fetchField();
+    }
+
+    $inventory->{'_meta'}->hostvars->{$node->title} = [
+      // @todo Add other metadata?
+      'aliases' => $aliases,
+      'redirection' => $redirection,
+    ];
+
+    $inventory->wordpress_sites['hosts'][] = $node->title;
+  }
 }

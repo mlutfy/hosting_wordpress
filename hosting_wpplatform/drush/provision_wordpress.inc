@@ -69,3 +69,52 @@ function provision_wordpress_wpcli_run(String $args) {
 
   drush_shell_exec_interactive("wp --path=$root --require=$drushrc $args");
 }
+
+/**
+ * Rewrites the domains.txt for dehydrated (https/letsencrypt).
+ */
+function provision_wordpress_update_domainstxt() {
+  $lines = [];
+
+  // Fetch all sites and their aliases
+  // Aegir normally uses 'services' to communicate between the frontend and backend
+  // (because these drush functions are being run in the context of the site, not aegir),
+  // Instead of doing that, we are using the Ansible inventory, easier in a way, especially
+  // we want to slowly move further torwards Ansible.
+
+  // Get the Aegir frontend URL (@todo move to a function)
+  // @todo This makes many assumptions
+  global $aliases;
+  require_once '/var/aegir/.drush/hostmaster.alias.drushrc.php';
+  $frontend = 'https://' . $aliases['hostmaster']['uri'] . '/inventory';
+
+  $data = file_get_contents($frontend);
+  $data = json_decode($data, true);
+
+  if (!empty($data['wordpress_sites']['hosts'])) {
+    foreach ($data['wordpress_sites']['hosts'] as $uri) {
+      $line = $uri;
+
+      if (!empty($data['_meta']['hostvars'][$uri]['aliases'])) {
+        foreach ($data['_meta']['hostvars'][$uri]['aliases'] as $alias) {
+          $line .= ' ' . $alias;
+        }
+      }
+
+      $lines[] = $line;
+    }
+  }
+
+  $fp = fopen('/var/aegir/config/letsencrypt/domains-wp.txt', 'w');
+  fwrite($fp, implode("\n", $lines) . "\n");
+  fclose($fp);
+
+  // Check if the config-wp file needs to be written
+  if (!file_exists('/var/aegir/config/letsencrypt/config-wp')) {
+    $fp = fopen('/var/aegir/config/letsencrypt/config-wp', 'w');
+    fwrite($fp, 'WELLKNOWN="/var/aegir/config/letsencrypt.d/well-known/acme-challenge"' . "\n"
+      . 'DOMAINS_TXT="/var/aegir/config/letsencrypt/domains-wp.txt"' . "\n"
+      . 'PARAM_CERTDIR="/var/aegir/config/letsencrypt.d/"' . "\n");
+    fclose($fp);
+  }
+}

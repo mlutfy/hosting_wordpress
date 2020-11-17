@@ -74,6 +74,16 @@ define('DB_COLLATE', '');
 /** Required by CiviCRM extensions */
 define('CIVICRM_CMSDIR', '<?php print $this->root; ?>');
 
+/**
+ * WordPress Database Table prefix.
+ *
+ * You can have multiple installations in one database if you give each a unique
+ * prefix. Only numbers, letters, and underscores please!
+ *
+ * NB: this can be overridden by the site-specific wp-config.php.
+ */
+$table_prefix  = 'wp_';
+
 /**#@+
  * Authentication Unique Keys and Salts.
  *
@@ -101,21 +111,15 @@ if (!defined('AUTH_KEY')) {
 /**#@-*/
 
 /**
- * WordPress Database Table prefix.
- *
- * You can have multiple installations in one database if you give each a unique
- * prefix. Only numbers, letters, and underscores please!
- */
-$table_prefix  = 'wp_';
-
-/**
  * For developers: WordPress debugging mode.
  *
  * Change this to true to enable the display of notices during development.
  * It is strongly recommended that plugin and theme developers use WP_DEBUG
  * in their development environments.
  */
-define('WP_DEBUG', false);
+if (!defined('WP_DEBUG')) {
+  define('WP_DEBUG', false);
+}
 
 /* That's all, stop editing! Happy blogging. */
 

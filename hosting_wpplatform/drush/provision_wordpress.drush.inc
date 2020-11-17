@@ -43,6 +43,35 @@ function provision_wordpress_drush_init() {
   }
 }
 
+function drush_provision_wordpress_pre_hosting_task() {
+  if (module_exists('hosting_alias')) {
+    $task = &drush_get_context('HOSTING_TASK');
+    if ($task->ref->type == 'wpsite' && function_exists('hosting_alias_get_aliases')) {
+      // Copied from hosting_alias
+      $aliases = implode(',', hosting_alias_get_aliases($task->ref));
+      $task->context_options['aliases'] = ($aliases) ? $aliases : 'null';
+
+      $redirection = db_query("SELECT redirection FROM {hosting_site_alias} WHERE vid = :vid", array(':vid' => $task->ref->vid))->fetchField();
+      $task->context_options['redirection'] = ($redirection) ? $redirection : 'null';
+    }
+  }
+}
+
+/**
+ * Implements hook_drush_context_import().
+ *
+ * If we're importing a site, then import the aliases and redirection values.
+ */
+function hosting_provision_drush_context_import($context, &$node) {
+  if ($context->type == 'wpsite') {
+    // Copied from hosting_alias
+    if (function_exists('hosting_alias_get_aliases')) {
+      $node->aliases = $context->aliases;
+      $node->redirection = $context->redirection;
+    }
+  }
+}
+
 /**
  * Register our directory as a place to find Provision classes.
  *

@@ -79,11 +79,23 @@ function hosting_wpsite_drush_context_import($context, &$node) {
  * Map values of wpsite node into command line arguments
  */
 function drush_hosting_wpsite_pre_hosting_task($task) {
-  // FIXME This is not implemented yet.
-  // It should also check whether the site is a wpsite.
-  return;
+  if ($task->ref->type != 'wpsite') {
+    return;
+  }
 
   $task = &drush_get_context('HOSTING_TASK');
+
+  // Add support for aliases and redirections
+  if (module_exists('hosting_alias')) {
+    $aliases = implode(',', hosting_alias_get_aliases($task->ref));
+    $task->context_options['aliases'] = ($aliases) ? $aliases : 'null';
+
+    $redirection = db_query("SELECT redirection FROM {hosting_site_alias} WHERE vid = :vid", array(':vid' => $task->ref->vid))->fetchField();
+    $task->context_options['redirection'] = ($redirection) ? $redirection : 'null';
+  }
+
+  // FIXME The rest is based on hosting_site, but not implemented yet.
+  return;
 
   if ($task->task_type == 'restore') {
     $backup = hosting_wpsite_get_backup($task->task_args['bid']);
@@ -98,9 +110,7 @@ function drush_hosting_wpsite_pre_hosting_task($task) {
     }
     $task->args[1] = implode(',', $backups);
   }
-
 }
-
 
 /**
  * implementation of the hosting_post_install hook

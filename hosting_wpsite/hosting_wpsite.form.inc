@@ -324,6 +324,12 @@ function hosting_wpsite_form($node, &$form_state) {
     );
   }
 
+  // Support for hosting_alias
+  if (user_access('create site aliases') && function_exists('hosting_alias_form_data')) {
+    $form['#validate'][] = 'hosting_alias_site_form_validate';
+    $form = hosting_alias_form_data($form, $form_state);
+  }
+
   return $form;
 }
 
@@ -390,6 +396,15 @@ function hosting_wpsite_validate($node, &$form) {
     form_set_error('wpsite_language', t('Please fill in a valid language'));
   }
 */
+
+  // Support for hosting_alias
+  // The data gets saved in hosting_wpsite_insert().
+  if (function_exists('hosting_alias_validate_alias')) {
+    $aliases = $form_state['values']['aliases'] = array_filter($form_state['values']['aliases']);
+    foreach ($aliases as $key => $alias) {
+      hosting_alias_validate_alias($form_state['node'], $alias, $key);
+    }
+  }
 }
 
 /**

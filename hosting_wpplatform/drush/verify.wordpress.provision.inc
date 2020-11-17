@@ -66,6 +66,28 @@ function drush_provision_wordpress_verify() {
   // This makes the assumption that if an https key is available, then we are
   // going to require https. This means we can install a site, run dehydrated manually,
   // then run provision-wordpress-verify to regenerate the vhost.
+  // @todo Move to drush_hosting_wpsite_pre_hosting_task ?
+  if (file_exists('/var/aegir/config/letsencrypt.d/')) {
+    // Add the domain to domains.txt
+    provision_wordpress_update_domainstxt();
+
+    if (!file_exists('/var/aegir/config/letsencrypt.d/' . d()->uri . '/privkey.pem')) {
+      // Write a temporary config and restart the webserver
+      d()->service('http')->create_config('site');
+      d()->service('http')->restart();
+    }
+
+    // Run dehydrated
+    // This runs everytime we verify, but the site aliases might have changed and we do
+    // not have a way to test that.
+    $output = [];
+    exec("/var/aegir/config/letsencrypt/script -c -f /var/aegir/config/letsencrypt/config-wp", $output);
+
+    foreach ($output as $line) {
+      drush_log(dt('WordPress: dehydrated: :line', [':line' => $line]), 'ok');
+    }
+  }
+
   if (file_exists('/var/aegir/config/letsencrypt.d/' . d()->uri . '/privkey.pem')) {
     // https_key is not really used, only in an "if" of the tpl
     d()->https_key = d()->uri;
