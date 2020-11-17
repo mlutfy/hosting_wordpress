@@ -55,6 +55,9 @@ function drush_provision_wordpress_verify() {
   // Directory permissions
   provision_wordpress_setup_directories();
 
+  // Refresh the file sites/example.org/wp-cli.yml so that we can use wp-cli without drush
+  provision_wordpress_update_wpcliyml();
+
   // URLs that change when migrating sites, for example
   // FIXME: Presumably there are valid use-cases for setting this to something more custom?
   // should we preg_replace?

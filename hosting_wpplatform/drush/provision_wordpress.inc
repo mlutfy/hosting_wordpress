@@ -118,3 +118,16 @@ function provision_wordpress_update_domainstxt() {
     fclose($fp);
   }
 }
+
+/**
+ * Rewrites the wp-cli.yml file in the site root.
+ */
+function provision_wordpress_update_wpcliyml() {
+  $fp = fopen(d()->site_path . '/wp-cli.yml', 'w');
+
+  // @todo Check if https is enabled, i.e. if a cert is present?
+  fwrite($fp, "path: " . d()->root . "\n"
+    . "url: https://" . d()->uri . "\n");
+
+  fclose($fp);
+}
