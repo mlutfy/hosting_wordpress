@@ -53,11 +53,29 @@ function provision_wordpress_setup_directories() {
       ->status();
   }
 
-  // Symlink the twentyfifteen theme directory for now,
-  // until we figure how to share themes/plugins?
-  provision_file()->symlink(d()->root . '/wp-content/themes/twentytwenty', $wp_content_dir . '/themes/twentytwenty')
-    ->succeed('Created symlink @path to @target')
-    ->fail('Could not create symlink @path to @target: @reason');
+  // Symlink themes and plugins from the platform to the site
+  provision_wordpress_symlink_subdirs('themes');
+  provision_wordpress_symlink_subdirs('plugins');
+}
+
+/**
+ * Symlink all plugins or themes from the platform, if not locally overriden.
+ */
+function provision_wordpress_symlink_subdirs($subdir) {
+  $dir = new DirectoryIterator(d()->root . '/wp-content/' . $subdir);
+
+  foreach ($dir as $fileinfo) {
+    if (!$fileinfo->isDot()) {
+      $fname = $fileinfo->getFilename();
+      $wp_content_dir = d()->site_path . '/wp-content';
+
+      if (!file_exists("$wp_content_dir/$subdir/$fname")) {
+        provision_file()->symlink(d()->root . "/wp-content/$subdir/$fname", "$wp_content_dir/$subdir/$fname")
+          ->succeed('Created symlink @path to @target')
+          ->fail('Could not create symlink @path to @target: @reason');
+      }
+    }
+  }
 }
 
 /**
