@@ -66,7 +66,6 @@ function drush_provision_wordpress_verify() {
   provision_wordpress_wpcli_run("option update siteurl $url");
   drush_log(dt('WordPress: home and siteurl set to :url', [':url' => $url]), 'ok');
 
-  // This makes the assumption that if an https key is available, then we are
   // going to require https. This means we can install a site, run dehydrated manually,
   // then run provision-wordpress-verify to regenerate the vhost.
   // @todo Move to drush_hosting_wpsite_pre_hosting_task ?
@@ -94,8 +93,12 @@ function drush_provision_wordpress_verify() {
   if (file_exists('/var/aegir/config/letsencrypt.d/' . d()->uri . '/privkey.pem')) {
     // https_key is not really used, only in an "if" of the tpl
     d()->https_key = d()->uri;
-    d()->context->https_enabled = 2;
     d()->https_cert_ok = true;
+
+    // Might not be necessary, sometimes throws non-init warnings
+    if (isset(d()->context)) {
+      d()->context->https_enabled = 2;
+    }
 
     # For now, only provision_symbiotic understand this (on nginx)
     # The default aegir tpl looks for a global $ssl_redirection, and
