@@ -880,7 +880,7 @@ function hosting_wpsite_ansible_inventory_alter(&$inventory) {
 
     if (function_exists('hosting_civicrm_ansible_inventory_shortname')) {
       $inventory->{'_meta'}->hostvars->{$node->title}['site_shortname'] = hosting_civicrm_ansible_inventory_shortname($node->title);
-      $inventory->{'_meta'}->hostvars->{$node->title}['cron_user'] = 'admin'; // @todo Should be configurable
+      $inventory->{'_meta'}->hostvars->{$node->title}['cron_user'] = $node->civicrm_ansible_cron_user ?? 'admin';
     }
 
     $inventory->wordpress_sites['hosts'][] = $node->title;
