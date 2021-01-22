@@ -17,10 +17,9 @@ function drush_provision_wordpress_verify() {
   d()->service_subscribe('http', '@server_master');
   d()->service_subscribe('db', '@server_127.0.0.1');
 
-  // This makes the assumption that if LetsEncrypt is enabled on the web server,
-  // the site will very soon be https-enabled.
-  $server = d()->wpplatform->web_server;
-  $protocol = ($server->Certificate_service_type == 'LetsEncrypt' ? 'https' : 'http');
+  // Sorry folks who run dev VMs on plain http, Aegir internals are too weird
+  // and there are too many odd cases where https is not detected correctly.
+  $protocol = 'https';
 
   // FIXME .. this relies on something something that might be removed
   // from provision/db/Provision/Service/db.php.

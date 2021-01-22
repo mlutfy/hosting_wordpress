@@ -13,6 +13,7 @@ Requirements
 
 * Aegir 3 (7.x-3.x)
 * Web server: nginx (Apache might work, but not well tested)
+* Lets Encrypt with `hosting_https`
 
 The [provision_symbiotic](https://github.com/coopsymbiotic/provision_symbiotic) module is recommended.
 It provides a few workarounds for the nginx vhost template.
@@ -20,6 +21,9 @@ It provides a few workarounds for the nginx vhost template.
 The [aegir_ansible](https://www.drupal.org/project/aegir_ansible) module is recommended if using https.
 This module will automatically write a domains-wp.txt file to regenerate https certificates with letsencrypt.
 Currently a cron is not automatically setup. See the https section below.
+
+This module assumes that Hosting Https is used, with Lets Encrypt. Previous attempts to supporting
+other kind of setups would cause odd bugs, and it is not something we need, so we removed it.
 
 Installation
 ============
