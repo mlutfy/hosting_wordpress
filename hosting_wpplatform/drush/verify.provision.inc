@@ -99,7 +99,7 @@ function provision_wordpress_provision_nginx_vhost_config($uri, $data) {
   // FIXME: Quick & dirty confs. Duplicates bits from {verify,install}.wordpress.provision.inc
   $site_path = d()->site_path;
   $phpfpm_socket_path = Provision_Service_http_nginx::getPhpFpmSocketPath();
-  $protocol = ($server->Certificate_service_type == 'LetsEncrypt' ? 'https' : 'http');
+  $protocol = 'https';
 
   $conf = <<<EOF
     fastcgi_param wp_content_dir {$site_path}/wp-content;
