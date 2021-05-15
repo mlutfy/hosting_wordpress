@@ -74,6 +74,11 @@ define('DB_COLLATE', '');
 /** Required by CiviCRM extensions */
 define('CIVICRM_CMSDIR', '<?php print $this->root; ?>');
 
+/** Load Aegir global settings */
+if (file_exists('/var/aegir/config/includes/global.inc')) {
+  require_once '/var/aegir/config/includes/global.inc';
+}
+
 /**
  * WordPress Database Table prefix.
  *

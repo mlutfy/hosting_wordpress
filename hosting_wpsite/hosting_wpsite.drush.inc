@@ -79,7 +79,7 @@ function hosting_wpsite_drush_context_import($context, &$node) {
  * Map values of wpsite node into command line arguments
  */
 function drush_hosting_wpsite_pre_hosting_task($task) {
-  if ($task->ref->type != 'wpsite') {
+  if (empty($task->ref->type) || $task->ref->type != 'wpsite') {
     return;
   }
 
