@@ -871,11 +871,16 @@ function hosting_wpsite_ansible_inventory_alter(&$inventory) {
       $redirection = db_query("SELECT redirection FROM {hosting_site_alias} WHERE vid = :vid", array(':vid' => $node->vid))->fetchField();
     }
 
+    // Fetch the platform root
+    $platform_publishpath = db_query("SELECT publish_path FROM {hosting_wpplatform} WHERE nid = :nid", [':nid' => $node->wpplatform])->fetchField();
+
     $inventory->{'_meta'}->hostvars->{$node->title} = [
       // @todo Add other metadata?
       'aliases' => $aliases,
       'redirection' => $redirection,
       'cms' => 'wordpress',
+      'site_root' => $platform_publishpath,
+      'site_path' => $platform_publishpath . '/sites/' . $node->title,
     ];
 
     if (function_exists('hosting_civicrm_ansible_inventory_shortname')) {
