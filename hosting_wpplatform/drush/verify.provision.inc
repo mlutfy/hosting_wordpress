@@ -174,6 +174,10 @@ EOF;
       try_files    \$uri =404;
       fastcgi_pass unix:{$phpfpm_socket_path};
     }
+    location ~* ^/sites/.*/wp-content/uploads/civicrm/(?:ConfigAndLog|custom|upload|templates_c) {
+      access_log off;
+      return 404;
+    }
 
 EOF;
 
