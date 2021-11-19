@@ -891,3 +891,28 @@ function hosting_wpsite_ansible_inventory_alter(&$inventory) {
     $inventory->wordpress_sites['hosts'][] = $node->title;
   }
 }
+
+/**
+ * Customize the task confirmation form for restore.
+ *
+ * This adds the backup listing to the confirmation dialog.
+ */
+function hosting_task_wordpress_restore_form($node) {
+  $list = hosting_site_backup_list($node->nid);
+  if (count($list)) {
+    $form['bid'] = [
+      '#type' => 'radios',
+      '#title' => t('Backups'),
+      '#options' => $list,
+      '#required' => TRUE,
+    ];
+  }
+  else {
+    $form['no_backups'] = [
+      '#type' => 'item',
+      '#title' => t('Backups'),
+      '#markup' => t('There are no valid backups available.'),
+    ];
+  }
+  return $form;
+}

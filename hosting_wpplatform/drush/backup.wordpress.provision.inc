@@ -40,6 +40,10 @@ function drush_provision_wordpress_backup_validate($backup_file = NULL) {
 function drush_provision_wordpress_backup() {
   $backup_file = drush_get_option('backup_file');
 
+  drush_log(dt("WordPress: generating SQL dump"), 'ok');
+  d()->service('db')->generate_dump();
+  drush_log(dt("WordPress: SQL dump generated"), 'ok');
+
   // Adds the site directory into the backup file
   drush_log(dt("Adding !site directory to !backup_file", array('!site' => d()->site_path, '!backup_file' => $backup_file)), 'backup');
 
@@ -61,11 +65,16 @@ function drush_provision_wordpress_backup() {
     $command = $command_base . $command_arguments;
   }
 
+  drush_log(dt("WordPress: generating backup archive.."), 'ok');
   $result = drush_shell_exec($command,  $backup_file);
 
   // Get the size of the backup
   $size = filesize($backup_file);
   drush_set_option('backup_file_size', $size);
+  drush_log(dt("WordPress: backup archive generated (!file, !size kB)", ['!file' => $backup_file, '!size' => $size]), 'ok');
+
+  provision_file()->unlink(d()->site_path . '/database.sql');
+  drush_log(dt("WordPress: deleted the SQL dump"), 'ok');
 
   chdir($olddir);
 

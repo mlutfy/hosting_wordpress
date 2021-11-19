@@ -140,6 +140,32 @@ function provision_wordpress_drush_command() {
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
+  $items['provision-wordpress-restore'] = array(
+    'description' => 'Restore the site to a previous backup. This will also generate a backup of the site as it was.',
+    'arguments' => array(
+      'site_backup.tar.gz' => dt('The backup to restore the site to.'),
+    ),
+    'allow-additional-options' => TRUE,
+    'examples' => array(
+      'drush @site provision-wordpress-restore ~/backups/some_site.tar.gz' => 'Restore the site to the backup in ~/backups/some_site.tar.gz.',
+    ),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
+  );
+  $items['provision-wordpress-deploy'] = array(
+    'description' => 'Deploy an existing backup to a new url.',
+    'arguments' => array(
+      'site_backup.tar.gz' => dt('The backup to deploy.'),
+    ),
+    'options' => array(
+      'old_uri' => dt('Old site uri to replace in references to sites/example.com/files/ in the database content.)'),
+    ),
+    'allow-additional-options' => TRUE,
+    'examples' => array(
+      'drush @site provision-wordpress-deploy ~/backups/some_site.tar.gz' => 'Deploy the site as defined by the site Drush alias, from the backup in ~/backups/some_site.tar.gz.',
+    ),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
+  );
+
 
   return $items;
 }

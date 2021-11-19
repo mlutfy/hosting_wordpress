@@ -79,11 +79,11 @@ function hosting_wpsite_drush_context_import($context, &$node) {
  * Map values of wpsite node into command line arguments
  */
 function drush_hosting_wpsite_pre_hosting_task($task) {
+  $task = &drush_get_context('HOSTING_TASK');
+
   if (empty($task->ref->type) || $task->ref->type != 'wpsite') {
     return;
   }
-
-  $task = &drush_get_context('HOSTING_TASK');
 
   // Add support for aliases and redirections
   if (module_exists('hosting_alias')) {
@@ -94,15 +94,12 @@ function drush_hosting_wpsite_pre_hosting_task($task) {
     $task->context_options['redirection'] = ($redirection) ? $redirection : 'null';
   }
 
-  // FIXME The rest is based on hosting_site, but not implemented yet.
-  return;
-
-  if ($task->task_type == 'restore') {
-    $backup = hosting_wpsite_get_backup($task->task_args['bid']);
+  if ($task->task_type == 'wordpress-restore') {
+    $backup = hosting_site_get_backup($task->task_args['bid']);
     $task->args[1] = $backup['filename'];
   }
 
-  if ($task->task_type == 'backup-delete') {
+  if ($task->task_type == 'wordpress-backup-delete') {
     foreach ($task->task_args as $bid => $filename) {
       if ($filename !== '0') {
         $backups[] = $filename;
