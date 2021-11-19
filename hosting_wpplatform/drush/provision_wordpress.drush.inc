@@ -128,6 +128,18 @@ function provision_wordpress_drush_command() {
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
     'aliases' => array('wp-cli', 'wp'),
   );
+  $items['provision-wordpress-backup'] = array(
+    'optional arguments' => array('backup-file' => dt('The file to save the backup to. This will be a gzipped tarball.')),
+    'options' => array(
+      'provision_backup_suffix' => dt('Set the extension for the backupfile, compression is derived from this (default: ".tar.gz"'),
+    ),
+    'description' => dt('Generate a back up for the site.'),
+    'allow-additional-options' => TRUE,
+    'examples' => array(
+      'drush @site provision-wordpress-backup' => 'Back up the site as defined by the site Drush alias generated with provision-save.',
+    ),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
+  );
 
   return $items;
 }

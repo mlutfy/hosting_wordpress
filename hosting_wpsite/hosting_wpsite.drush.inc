@@ -167,7 +167,7 @@ function hosting_wpsite_hosting_wordpress_install_task_rollback($task, $data) {
 function hosting_wpsite_post_hosting_wordpress_disable_task($task, $data) {
   if ($data['context']['backup_file'] && $data->ref->type == 'wpsite') {
     $wpplatform = node_load($task->ref->wpplatform);
-    hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being disabled'), $data['context']['backup_file_size']);
+    hosting_site_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being disabled'), $data['context']['backup_file_size']);
   }
   $task->ref->wpsite_status = HOSTING_WPSITE_DISABLED;
   $task->ref->no_verify = TRUE;
@@ -185,7 +185,7 @@ function hosting_wpsite_post_hosting_wordpress_disable_task($task, $data) {
 function hosting_wpsite_post_hosting_wordpress_restore_task($task, $data) {
   if ($data['context']['backup_file'] && $task->ref->type == 'wpsite') {
     $wpplatform = node_load($task->ref->wpplatform);
-    hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being restored to a previous version'), $data['context']['backup_file_size']);
+    hosting_site_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], t('Generated before being restored to a previous version'), $data['context']['backup_file_size']);
   }
 }
 
@@ -227,10 +227,9 @@ function hosting_wpsite_post_hosting_wordpress_delete_task($task, $data) {
 function hosting_wpsite_post_hosting_wordpress_backup_task($task, $data) {
   if ($data['context']['backup_file'] && $task->ref->type == 'wpsite') {
     $wpplatform = node_load($task->ref->wpplatform);
-
-    $desc = $task->task_args['description'];
+    $desc = $task->task_args['description'] ?? '';
     $desc = ($desc) ? $desc : t('Generated on request');
-    hosting_wpsite_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], $desc, $data['context']['backup_file_size']);
+    hosting_site_add_backup($task->ref->nid, $wpplatform->web_server, $data['context']['backup_file'], $desc, $data['context']['backup_file_size']);
   }
 }
 
