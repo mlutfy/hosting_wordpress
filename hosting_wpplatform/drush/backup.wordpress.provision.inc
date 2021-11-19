@@ -40,11 +40,6 @@ function drush_provision_wordpress_backup_validate($backup_file = NULL) {
 function drush_provision_wordpress_backup() {
   $backup_file = drush_get_option('backup_file');
 
-// FIXME
-if (!$backup_file) {
-  $backup_file = '/var/aegir/backups/test.tar.gz';
-}
-
   // Adds the site directory into the backup file
   drush_log(dt("Adding !site directory to !backup_file", array('!site' => d()->site_path, '!backup_file' => $backup_file)), 'backup');
 
