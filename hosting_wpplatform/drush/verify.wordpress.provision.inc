@@ -65,6 +65,9 @@ function drush_provision_wordpress_verify() {
   provision_wordpress_wpcli_run("option update siteurl $url");
   drush_log(dt('WordPress: home and siteurl set to :url', [':url' => $url]), 'ok');
 
+  // Regenerate the civicrm.settings.php
+  provision_wordpress_regenerate_civicrm_settings();
+
   // going to require https. This means we can install a site, run dehydrated manually,
   // then run provision-wordpress-verify to regenerate the vhost.
   // @todo Move to drush_hosting_wpsite_pre_hosting_task ?
