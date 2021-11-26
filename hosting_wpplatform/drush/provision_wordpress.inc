@@ -6,6 +6,14 @@
 function provision_wordpress_setup_directories() {
   $wp_content_dir = d()->site_path . '/wp-content';
 
+  // This script helps fix permissions on files created by www-data
+  // It is deployed by Ansible:
+  // https://github.com/coopsymbiotic/coopsymbiotic-ansible/blob/master/roles/aegir/templates/usr/local/bin/fix-wordpress-permissions.sh
+  if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
+    $success = drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", d()->site_path);
+    drush_log(dt('WordPress: executed fix-wordpress-permissions.sh'), ($success ? 'success' : 'warning'));
+  }
+
   $content_dirs = [
     d()->site_path,
     $wp_content_dir,
@@ -252,5 +260,5 @@ function provision_wordpress_regenerate_civicrm_settings() {
 
   $str = trim($str) . "\n";
   file_put_contents($civicrm_settings_filename, $str);
-  drush_log(dt("WordPress: Regenerated civicrm.settings.php"), 'ok');
+  drush_log(dt("WordPress: Regenerated civicrm.settings.php"), 'succeed');
 }
