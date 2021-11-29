@@ -16,7 +16,9 @@ class Provision_Service_wpsite extends Provision_Service {
     $context->service_subscribe('db', $context->db_server->name);
 
     // Required for wordpress-delete (to delete the vhost file).
-    $context->service_subscribe('http', $context->web_server->name);
+    if (!empty($context->web_server->name)) {
+      $context->service_subscribe('http', $context->web_server->name);
+    }
 
     // Drushrc needs this to find the drushrc.php file
     $context->setProperty('site_path');
