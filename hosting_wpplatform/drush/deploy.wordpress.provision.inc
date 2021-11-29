@@ -152,7 +152,7 @@ function drush_provision_wordpress_deploy($backup_file) {
   if (!drush_get_error() && drush_get_option('deploy_replace_site', FALSE)) {
     drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", drush_get_option('extract_path'));
     _provision_recursive_delete(drush_get_option('extract_path'));
-    drush_log(dt('WordPress: deleted !path', ['!path' => drush_get_option('extract_path')], 'ok');
+    drush_log(dt('WordPress: deleted !path', ['!path' => drush_get_option('extract_path')], 'ok'));
   }
 
   // Remove the old database.
