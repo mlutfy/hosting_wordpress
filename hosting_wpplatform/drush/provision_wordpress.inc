@@ -11,7 +11,7 @@ function provision_wordpress_setup_directories() {
   // https://github.com/coopsymbiotic/coopsymbiotic-ansible/blob/master/roles/aegir/templates/usr/local/bin/fix-wordpress-permissions.sh
   if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
     $success = drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", d()->site_path);
-    drush_log(dt('WordPress: executed fix-wordpress-permissions.sh'), ($success ? 'success' : 'warning'));
+    drush_log(dt('WordPress: executed sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=!site_path', ['!site_path' => d()->site_path]), ($success ? 'success' : 'warning'));
   }
 
   $content_dirs = [
@@ -64,6 +64,13 @@ function provision_wordpress_setup_directories() {
   // Symlink themes and plugins from the platform to the site
   provision_wordpress_symlink_subdirs('themes');
   provision_wordpress_symlink_subdirs('plugins');
+
+  // And yes, we run it again
+  // we should remove the above code, and just use the shell script
+  if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
+    $success = drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", d()->site_path);
+    drush_log(dt('WordPress: executed sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=!site_path', ['!site_path' => d()->site_path]), ($success ? 'success' : 'warning'));
+  }
 }
 
 /**
