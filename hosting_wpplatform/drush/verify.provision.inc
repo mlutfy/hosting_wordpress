@@ -181,21 +181,17 @@ EOF;
 
 EOF;
 
-  $server = d()->wpplatform->web_server;
-  if (($server->Certificate_service_type == 'LetsEncrypt') && ($challenge_path = $server->letsencrypt_challenge_path)) {
-    drush_log(dt("Injecting Let's Encrypt 'well-known' ACME challenge directory ':path' into Nginx vhost entry.", array(
-      ':path' => $challenge_path,
-    )));
+  # We assume letsencrypt is used, and if not, this should not cause problems
+  $challenge_path = '/var/aegir/config/letsencrypt.d/well-known/acme-challenge';
 
-    $lines = [];
-    $lines[] = "  # Allow access to letsencrypt.org ACME challenges directory.";
-    $lines[] = "  location ^~ /.well-known/acme-challenge {";
-    $lines[] = "    alias {$challenge_path};";
-    $lines[] = "    try_files \$uri 404;";
-    $lines[] = "  }";
-    $lines[] = "\n";
-    $conf .= "\n\n" . implode("\n", $lines);
-  }
+  $lines = [];
+  $lines[] = "  # Allow access to letsencrypt.org ACME challenges directory.";
+  $lines[] = "  location ^~ /.well-known/acme-challenge {";
+  $lines[] = "    alias {$challenge_path};";
+  $lines[] = "    try_files \$uri 404;";
+  $lines[] = "  }";
+  $lines[] = "\n";
+  $conf .= "\n\n" . implode("\n", $lines);
 
   drush_log('WordPress: leaving provision_wordpress_provision_nginx_vhost_config', 'ok');
   return $conf;
