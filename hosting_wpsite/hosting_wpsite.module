@@ -111,6 +111,10 @@ function hosting_wpsite_theme($existing, $type, $theme, $path) {
       'url' => NULL,
     ),
   );
+  // Copied from hosting/clone.module
+  $items['hosting_wpsite_task_clone_form'] = [
+    'render element' => 'form',
+  ];
 
   return $items;
 }
@@ -324,6 +328,13 @@ function hosting_wpsite_hosting_tasks() {
     'access callback' => 'hosting_wpsite_task_menu_access',
   );
 
+  $tasks['wpsite']['wordpress-clone'] = [
+    'title' => t('Clone'),
+    'description' => t('Create a copy of this site'),
+    'dialog' => TRUE,
+    'access callback' => 'hosting_wpsite_task_menu_access',
+  ];
+
   return $tasks;
 }
 
@@ -400,12 +411,92 @@ function hosting_wpsite_node_access($node, $op, $account) {
 }
 
 /**
+ * Implements hook_form().
+ */
+function hosting_wpsite_task_migrate_form($node) {
+  $form['new_uri'] = [
+    '#title' => t('Domain name'),
+    '#description' => t("Changing the domain name when migrating effectively 'renames' the site."),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#weight' => '-1',
+    '#default_value' => hosting_site_canonical_url($node),
+  ];
+
+  $db_servers = hosting_get_servers('db');
+
+  if (sizeof($db_servers) > 1) {
+    $form['new_db_server'] = [
+      '#type' => 'radios',
+      '#title' => t('Database server'),
+      '#required' => TRUE,
+      '#description' => t('The database server the site will use to host its content.'),
+      '#options' => $db_servers,
+      '#default_value' => $node->db_server,
+    ];
+  }
+  else {
+    $form['new_db_server'] = [
+      '#type' => 'hidden',
+      '#value' => $node->db_server,
+    ];
+  }
+
+  $wpplatforms = _hosting_get_enabled_wpplatforms();
+
+  foreach ($wpplatforms as $nid => $title) {
+    $form[$nid]['target_platform'] = [
+      '#type' => 'radio',
+      '#title' => check_plain($title),
+      '#parents' => array('parameters', 'target_platform'),
+      "#return_value" => $nid,
+    ];
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_hosting_task_TASK_TYPE_form().
+ */
+function hosting_task_wordpress_clone_form($node) {
+  $form = hosting_wpsite_task_migrate_form($node);
+  $form['new_uri']['#description'] = t('The new domain name of the clone site.');
+  return $form;
+}
+
+/**
+ * Implements hook_hosting_task_TASK_TYPE_form_validate().
+ */
+function hosting_wpsite_hosting_task_wordpress_clone_form_validate($form, &$form_state) {
+  $site = $form['parameters']['#node'];
+
+  $url = hosting_site_get_domain($form_state['values']['parameters']['new_uri']); // domain names are case-insensitive
+
+  if ($url == hosting_site_get_domain($site->title)) {
+    form_set_error('new_uri', t("To clone a site you need to specify a new Domain name to clone it to."));
+  }
+  else {
+    hosting_task_migrate_form_validate($form, $form_state);
+  }
+}
+
+/**
  * Callback for site backup action.
  *
  * @see: hosting_task_action_info().
  */
 function hosting_wpsite_backup_action($node) {
   hosting_add_task($node->nid, 'backup');
+}
+
+/**
+ * Callback for site clone action.
+ *
+ * @see: hosting_task_action_info().
+ */
+function hosting_wpsite_clone_action($node) {
+  hosting_add_task($node->nid, 'clone');
 }
 
 /**
