@@ -11,7 +11,7 @@
 function hosting_wpsite_node_info() {
   $types["wpsite"] = array(
     "type" => 'wpsite',
-    "name" => 'Site',
+    "name" => 'WP Site',
     'base' => 'hosting_wpsite',
     "has_title" => TRUE,
     "title_label" => 'Domain name',
