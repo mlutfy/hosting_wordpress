@@ -233,43 +233,6 @@ function hosting_wpsite_form($node, &$form_state) {
     '#autocomplete_path' => 'hosting_client/autocomplete/client',
   ), 'filter_xss', $editable);
 
-  // Install profiles
-/* TODO?
-  $profiles = hosting_get_profiles();
-  foreach ($profiles as $id => $name) {
-    $profile = hosting_package_instance_load(array('p.nid' => $id));
-    $profiles[$id] = theme('hosting_wpsite_profile', array('profile' => $profile, 'html' => TRUE));
-  }
-  natcasesort($profiles);
-  reset($profiles);
-
-  _hosting_wpsite_field($form, $node, 'profile', array(
-    '#type' => 'radios',
-    '#title' => t('Install profile'),
-    '#description' => t('The type of wpsite to install.<br />
-                           The profile selected here determines the list of supported platforms below.'),
-    '#options' => $profiles,
-    '#default_value' => isset($node->profile) ? $node->profile : hosting_get_default_profile(key($profiles)),
-    '#required' => TRUE,
-    '#attributes' => array('class' => array("hosting-wpsite-form-profile-options")),
-    '#ajax' => array(
-      'callback' => 'hosting_wpsite_platform_callback',
-      'wrapper' => 'hosting-wpsite-field-platform' ,
-      'effect' => 'fade',
-      'event' => 'change',
-      'method' => 'replace',
-    ),
-  ), '_hosting_node_link');
-
-  // Override the defaults if the profile has been changed.
-  if (isset($form_state['values']['profile'])) {
-    $selected_profile = $form_state['values']['profile'];
-  }
-  else{
-    $selected_profile = hosting_package_instance_load(array('p.nid' => hosting_get_default_profile()))->nid;
-  }
-*/
-
   // NB: in hosting_site, this calls hosting_get_profile_platforms($selected_profile);
   // but we do not have profiles for wp platforms.
   $platforms = _hosting_get_enabled_wpplatforms();
