@@ -28,12 +28,22 @@ include_once 'hosting_wpsite.nodeapi.inc';
 include_once 'hosting_wpsite.form.inc';
 # include_once 'hosting_site.backups.inc';
 
-//Conditonally include site quotas
-/* TODO
-if (module_exists('hosting_quota')) {
-  include_once 'hosting_site.quota.inc';
+/**
+ *
+ */
+/**
+ * Implements hook_init().
+ */
+function hosting_wpsite_init() {
+  static $already_called = FALSE;
+
+  if ($already_called) {
+    return;
+  }
+
+  $already_called = TRUE;
+  drupal_add_css(drupal_get_path('module', 'hosting_wpsite') . '/hosting_wpsite.css');
 }
-*/
 
 /**
  * Implements hook_menu().

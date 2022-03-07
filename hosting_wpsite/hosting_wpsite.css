@@ -1,0 +1,17 @@
+/**
+ * Hide Edit/Create Node vertical tabs, with menu/revision/author settings
+ */
+#wpsite-node-form .vertical-tabs,
+#wpsite-node-form #edit-preview,
+#wpsite-node-form #hosting-wpsite-field-wpplatform-description {
+  display: none;
+}
+
+/**
+ * View wpsite
+ */
+.node-wpsite #hosting-wpsite-info {
+  /* float so that we can see the status of the list of tasks */
+  width: 300px;
+  float: left;
+}
