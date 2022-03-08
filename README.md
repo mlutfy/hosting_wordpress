@@ -156,7 +156,7 @@ Copyright and license
 =====================
 
 Provision Wordpress  
-(C) 2015-2020 Mathieu Lutfy <mathieu@symbiotic.coop>
+(C) 2015-2022 Mathieu Lutfy <mathieu@symbiotic.coop>
 
 Distributed under the terms of the GNU Affero General public license v3 (AGPL).  
 http://www.gnu.org/licenses/agpl.html
