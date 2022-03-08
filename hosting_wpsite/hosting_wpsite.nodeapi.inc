@@ -57,13 +57,6 @@ function hosting_wpsite_view(&$node, $teaser = FALSE) {
     '#markup' => _hosting_node_link($node->wpplatform),
   );
 
-  if ($node->profile) {
-    $node->content['info']['profile'] = array(
-      '#type' => 'item',
-      '#title' => t('Install profile'),
-      '#markup' => _hosting_node_link($node->profile),
-    );
-  }
   if ($node->wpsite_language) {
     $node->content['info']['wpsite_language'] = array(
       '#type' => 'item',
@@ -170,8 +163,6 @@ function hosting_wpsite_insert(&$node) {
   $node->cron_key = isset($node->cron_key) ? $node->cron_key : '';
   // Ensure that the last_cron value is set.
   $node->last_cron = isset($node->last_cron) ? $node->last_cron : 0;
-  // Provide a dummy profile, e.g. for hosting-import.
-  $node->profile = isset($node->profile) ? $node->profile : 0;
 
   $id = db_insert('hosting_wpsite')
     ->fields(array(
@@ -181,7 +172,7 @@ function hosting_wpsite_insert(&$node) {
       'db_server' => $node->db_server,
       'db_name' => isset($node->db_name) ? $node->db_name : '',
       'wpplatform' => $node->wpplatform,
-      // 'profile' => $node->profile,
+      'profile' => 0, // @todo remove
       'language' => $node->wpsite_language,
       'last_cron' => $node->last_cron,
       'cron_key' => $node->cron_key,
@@ -203,7 +194,7 @@ function hosting_wpsite_node_insert($node) {
     if ((empty($node->old_vid))) {
       hosting_context_register($node->nid, isset($node->hosting_name) ? $node->hosting_name : $node->title);
       if (isset($node->import)) {
-        hosting_add_task($node->nid, 'import');
+        hosting_add_task($node->nid, 'wordpress-import');
       }
       else {
         hosting_add_task($node->nid, 'wordpress-install');
@@ -236,7 +227,7 @@ function hosting_wpsite_update(&$node) {
         'last_cron' => $node->last_cron,
         'cron_key' => $node->cron_key,
         'status' => $node->wpsite_status,
-        'profile' => $node->profile,
+        'profile' => 0, // @todo remove
         'language' => $node->wpsite_language,
         'verified' => $node->verified,
       ))
@@ -266,7 +257,7 @@ function hosting_wpsite_node_update($node) {
 function hosting_wpsite_load($nodes) {
   foreach ($nodes as $nid => &$node) {
     if ($node->type == 'wpsite') {
-      $additions = db_query('SELECT  client, db_server, db_name, wpplatform, profile, language as wpsite_language, last_cron, cron_key, status AS wpsite_status, verified FROM {hosting_wpsite} WHERE vid = :vid', array(':vid' => $node->vid))->fetch();
+      $additions = db_query('SELECT  client, db_server, db_name, wpplatform, language as wpsite_language, last_cron, cron_key, status AS wpsite_status, verified FROM {hosting_wpsite} WHERE vid = :vid', array(':vid' => $node->vid))->fetch();
       foreach ($additions as $property => &$value) {
         $node->$property = $value;
       }

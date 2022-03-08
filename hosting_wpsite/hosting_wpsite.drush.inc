@@ -239,11 +239,6 @@ function hosting_wpsite_post_hosting_wordpress_import_task($task, $data) {
 
   $task->ref->db_name = $data['self']['db_name'];
   node_save($task->ref);
-
-  $packages = $data['context']['packages'];
-  hosting_package_sync($packages);
-  hosting_package_instance_sync($task->ref->nid, $task->ref->type, $packages);
-
 }
 
 /**

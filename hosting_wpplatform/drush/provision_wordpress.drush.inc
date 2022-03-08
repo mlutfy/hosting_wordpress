@@ -219,6 +219,17 @@ function provision_wordpress_drush_command() {
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
   );
+  $items['provision-wordpress-import'] = array(
+    'description' => dt('Turn an already running WP site into a provisioned site.'),
+    'options' => array(
+      'client_email' => dt('The email address of the client to use.'),
+    ),
+    'allow-additional-options' => TRUE,
+    'examples' => array(
+      'drush @site provision-wordpress-import' => 'Import the WP site as defined by the site Drush alias generated with provision-save.',
+    ),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH
+  );
 
   return $items;
 }
