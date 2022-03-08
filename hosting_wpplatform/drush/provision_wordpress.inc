@@ -9,7 +9,8 @@ function provision_wordpress_setup_directories() {
   // This script helps fix permissions on files created by www-data
   // It is deployed by Ansible:
   // https://github.com/coopsymbiotic/coopsymbiotic-ansible/blob/master/roles/aegir/templates/usr/local/bin/fix-wordpress-permissions.sh
-  if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
+  // NB: wp_content_dir might not yet exist, if we are in the process of installing WordPress
+  if (file_exists($wp_content_dir) && file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
     $success = drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", d()->site_path);
     drush_log(dt('WordPress: executed sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=!site_path', ['!site_path' => d()->site_path]), ($success ? 'success' : 'warning'));
   }
