@@ -32,6 +32,8 @@ print "<?php \n";
  * looking for a drushrc.php file. It also looks for a wp-config.php file, to avoid
  * going higher than the site root.
  */
+require_once '/var/aegir/config/includes/global.inc';
+
 if (php_sapi_name() == "cli") {
   $directory = getcwd();
 
