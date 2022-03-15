@@ -10,68 +10,68 @@ function provision_wordpress_setup_directories() {
   // It is deployed by Ansible:
   // https://github.com/coopsymbiotic/coopsymbiotic-ansible/blob/master/roles/aegir/templates/usr/local/bin/fix-wordpress-permissions.sh
   // NB: wp_content_dir might not yet exist, if we are in the process of installing WordPress
-  if (file_exists($wp_content_dir) && file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
-    $success = drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", d()->site_path);
-    drush_log(dt('WordPress: executed sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=!site_path', ['!site_path' => d()->site_path]), ($success ? 'success' : 'warning'));
-  }
-
-  $content_dirs = [
-    d()->site_path,
-    $wp_content_dir,
-    $wp_content_dir . '/languages',
-    $wp_content_dir . '/plugins',
-    $wp_content_dir . '/themes',
-    $wp_content_dir . '/uploads',
-  ];
-
-  foreach ($content_dirs as $dir) {
-    $exists = provision_file()->exists($dir)
-      ->succeed('WordPress: @path exists.')
-      ->status();
-
-    if (!$exists) {
-      $exists = provision_file()->mkdir($dir)
+  if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
+    if (!is_dir($wp_content_dir)) {
+      provision_file()->mkdir($wp_content_dir)
         ->succeed('Wordpress: @path has been created.')
         ->fail('CiviCRM: @path could not be created.', 'DRUSH_PERM_ERROR')
         ->status();
     }
-
-    // setgid directories, it avoids a few permissions issues
-    // where files are aegir.www-data.
-    provision_file()->chmod($dir, 02750, TRUE)
-      ->succeed('Changed permissions of @path to @perm')
-      ->fail('Could not change permissions <code>@path to @perm')
-      ->status();
-
-    provision_file()->chgrp($dir, d('@server_master')->web_group, TRUE)
-      ->succeed('Changed group ownership @path to @gid')
-      ->fail('Could not change group ownership of @path to @gid')
-      ->status();
+    $success = drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", d()->site_path);
+    drush_log(dt('WordPress: executed sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=!site_path', ['!site_path' => d()->site_path]), ($success ? 'success' : 'warning'));
   }
+  else {
+    $content_dirs = [
+      d()->site_path,
+      $wp_content_dir,
+      $wp_content_dir . '/languages',
+      $wp_content_dir . '/plugins',
+      $wp_content_dir . '/themes',
+      $wp_content_dir . '/uploads',
+    ];
 
-  // Directories writable by www-data
-  $writable_dirs = [
-    $wp_content_dir . '/languages',
-    $wp_content_dir . '/uploads',
-  ];
+    foreach ($content_dirs as $dir) {
+      $exists = provision_file()->exists($dir)
+        ->succeed('WordPress: @path exists.')
+        ->status();
 
-  foreach ($writable_dirs as $dir) {
-    provision_file()->chmod($dir, 02770, TRUE)
-      ->succeed('Changed permissions of @path to @perm')
-      ->fail('Could not change permissions <code>@path to @perm')
-      ->status();
+      if (!$exists) {
+        $exists = provision_file()->mkdir($dir)
+          ->succeed('Wordpress: @path has been created.')
+          ->fail('CiviCRM: @path could not be created.', 'DRUSH_PERM_ERROR')
+          ->status();
+      }
+
+      // setgid directories, it avoids a few permissions issues
+      // where files are aegir.www-data.
+      provision_file()->chmod($dir, 02750, TRUE)
+        ->succeed('Changed permissions of @path to @perm')
+        ->fail('Could not change permissions <code>@path to @perm')
+        ->status();
+
+      provision_file()->chgrp($dir, d('@server_master')->web_group, TRUE)
+        ->succeed('Changed group ownership @path to @gid')
+        ->fail('Could not change group ownership of @path to @gid')
+        ->status();
+    }
+
+    // Directories writable by www-data
+    $writable_dirs = [
+      $wp_content_dir . '/languages',
+      $wp_content_dir . '/uploads',
+    ];
+
+    foreach ($writable_dirs as $dir) {
+      provision_file()->chmod($dir, 02770, TRUE)
+        ->succeed('Changed permissions of @path to @perm')
+        ->fail('Could not change permissions <code>@path to @perm')
+        ->status();
+    }
   }
 
   // Symlink themes and plugins from the platform to the site
   provision_wordpress_symlink_subdirs('themes');
   provision_wordpress_symlink_subdirs('plugins');
-
-  // And yes, we run it again
-  // we should remove the above code, and just use the shell script
-  if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
-    $success = drush_shell_exec("sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s", d()->site_path);
-    drush_log(dt('WordPress: executed sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=!site_path', ['!site_path' => d()->site_path]), ($success ? 'success' : 'warning'));
-  }
 }
 
 /**
