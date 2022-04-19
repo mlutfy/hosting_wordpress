@@ -961,6 +961,15 @@ function hosting_wpsite_ansible_inventory_alter(&$inventory) {
     ],
   ];
 
+  if (empty($inventory->civicrm_sites)) {
+    $inventory->civicrm_sites = [
+      'hosts' => [],
+      'vars' => [
+        'ansible_ssh_host' => 'localhost',
+      ],
+    ];
+  }
+
   $sites = hosting_get_wpsites_by_status(null, HOSTING_WPSITE_ENABLED);
 
   foreach ($sites as $node) {
@@ -990,6 +999,11 @@ function hosting_wpsite_ansible_inventory_alter(&$inventory) {
     }
 
     $inventory->wordpress_sites['hosts'][] = $node->title;
+
+    // If CiviCRM is enabled, add to the civicrm_sites group (also managed in hosting_civicrm)
+    if (file_exists("$platform_publishpath/sites/{$node->title}/wp-content/uploads/civicrm/civicrm.settings.php")) {
+      $inventory->civicrm_sites['hosts'][] = $node->title;
+    }
   }
 }
 
