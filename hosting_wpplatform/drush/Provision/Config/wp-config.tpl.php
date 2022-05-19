@@ -103,6 +103,9 @@ $table_prefix  = 'wp_';
 if (file_exists($_SERVER['wp_content_dir'] . '/../wp-config.php')) {
   require_once $_SERVER['wp_content_dir'] . '/../wp-config.php';
 }
+if (file_exists($_SERVER['wp_content_dir'] . '/../drushrc.php')) {
+  require_once($_SERVER['wp_content_dir'] . '/../drushrc.php');
+}
 
 if (!defined('AUTH_KEY')) {
   define('AUTH_KEY',         'put your unique phrase here');
