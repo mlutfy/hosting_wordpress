@@ -270,3 +270,23 @@ function provision_wordpress_regenerate_civicrm_settings() {
   file_put_contents($civicrm_settings_filename, $str);
   drush_log(dt("WordPress: Regenerated civicrm.settings.php"), 'succeed');
 }
+
+/**
+ * Generate a random string, using a cryptographically secure
+ * pseudorandom number generator (random_int)
+ *
+ * Source:
+ * https://stackoverflow.com/a/31284266/2387700
+ */
+function provision_wordpress_generate_salt($length = 64) {
+  $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  $str = '';
+  $max = mb_strlen($keyspace, '8bit') - 1;
+  if ($max < 1) {
+    throw new Exception('$keyspace must be at least two characters long');
+  }
+  for ($i = 0; $i < $length; ++$i) {
+    $str .= $keyspace[random_int(0, $max)];
+  }
+  return $str;
+}

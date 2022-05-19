@@ -47,6 +47,14 @@ function drush_provision_wordpress_verify() {
   drush_set_option('wp_content_dir', $_SERVER['wp_content_dir'], 'wpsite');
   drush_set_option('wp_content_url', $_SERVER['wp_content_url'], 'wpsite');
 
+  // Update salts
+  $salts = ['AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY', 'NONCE_KEY', 'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT', 'NONCE_SALT'];
+
+  foreach ($salts as $saltname) {
+    $value = provision_wordpress_generate_salt();
+    drush_set_option('salt_' . $saltname, $value, 'wpsite');
+  }
+
   // Refresh the drushrc.php
   $config = new Provision_Config_Drushrc_wpsite(d()->name);
   $config->write();
