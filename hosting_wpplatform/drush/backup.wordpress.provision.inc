@@ -44,6 +44,15 @@ function drush_provision_wordpress_backup() {
   d()->service('db')->generate_dump();
   drush_log(dt("WordPress: SQL dump generated"), 'ok');
 
+  // This script is not packaged with the module (maybe it should, but trying to move away from Drupal-isms), see:
+  // https://github.com/coopsymbiotic/coopsymbiotic-ansible/tree/master/roles/aegir/templates/usr/local/bin
+  if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
+    drush_log(dt("WordPress: running fix-permission script"), 'ok');
+    $command = '/usr/local/bin/fix-wordpress-permissions.sh --site-path=%s';
+    $result = drush_shell_exec($command, d()->site_path);
+    drush_log(dt("WordPress: finished running fix-permission script"), 'ok');
+  }
+
   // Adds the site directory into the backup file
   drush_log(dt("Adding !site directory to !backup_file", array('!site' => d()->site_path, '!backup_file' => $backup_file)), 'backup');
 
