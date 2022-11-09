@@ -48,7 +48,7 @@ function drush_provision_wordpress_backup() {
   // https://github.com/coopsymbiotic/coopsymbiotic-ansible/tree/master/roles/aegir/templates/usr/local/bin
   if (file_exists('/usr/local/bin/fix-wordpress-permissions.sh')) {
     drush_log(dt("WordPress: running fix-permission script"), 'ok');
-    $command = '/usr/local/bin/fix-wordpress-permissions.sh --site-path=%s';
+    $command = 'sudo /usr/local/bin/fix-wordpress-permissions.sh --site-path=%s';
     $result = drush_shell_exec($command, d()->site_path);
     drush_log(dt("WordPress: finished running fix-permission script"), 'ok');
   }
