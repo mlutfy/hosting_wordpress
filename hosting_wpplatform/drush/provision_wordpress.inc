@@ -256,7 +256,7 @@ function provision_wordpress_regenerate_civicrm_settings() {
   $extraSettings[] = "\$civicrm_paths['civicrm.files']['path'] = '" . d()->root . "/sites/" . d()->uri . "/wp-content/uploads/civicrm/';";
   $extraSettings[] = "\$civicrm_paths['civicrm.files']['url'] = 'https://" . d()->uri . "/sites/" . d()->uri . "/wp-content/uploads/civicrm';";
   $extraSettings[] = "\$civicrm_setting['domain']['userFrameworkResourceURL'] = 'https://" . d()->uri . "/sites/" . d()->uri . "/wp-content/plugins/civicrm/civicrm';";
-  $extraSettings[] = "@include_once('/var/aegir/platforms/wordpress/sites/" . d()->uri . "/local.drushrc.php');";
+  $extraSettings[] = "@include_once('/var/aegir/platforms/wordpress/sites/" . d()->uri . "/drushrc.php');";
   $params['extraSettings'] = implode("\n", $extraSettings);
 
   $tplPath = d()->root . '/wp-content/plugins/civicrm/civicrm/templates/CRM/common/civicrm.settings.php.template';
@@ -268,7 +268,7 @@ function provision_wordpress_regenerate_civicrm_settings() {
 
   $str = trim($str) . "\n";
   file_put_contents($civicrm_settings_filename, $str);
-  drush_log(dt("WordPress: Regenerated civicrm.settings.php"), 'succeed');
+  drush_log(dt("WordPress: Regenerated civicrm.settings.php"), 'ok');
 }
 
 /**

@@ -20,5 +20,10 @@ if (!defined('<?php print $key; ?>')) {
   define('<?php print $key; ?>', $options['salt_<?php print $key; ?>']);
 }
 <?php } ?>
+# Always enable clean URLs in CiviCRM, since we always support them
+# This avoids some issues when using cv (CLI)
+if (!defined('CIVICRM_CLEANURL')) {
+  define('CIVICRM_CLEANURL', 1 );
+}
 # local non-aegir-generated additions
 @include_once('<?php print $this->site_path  ?>/local.drushrc.php');
