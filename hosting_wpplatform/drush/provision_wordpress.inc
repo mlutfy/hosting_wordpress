@@ -184,6 +184,15 @@ function provision_wordpress_regenerate_civicrm_settings() {
     return;
   }
 
+  $dbHost = drush_get_option('db_host', NULL, 'site');
+  $dbPort = drush_get_option('db_port', NULL, 'site') ?? '3306';
+  $dbHostParts = explode(':', $dbHost);
+  // If there is no port specified in the host or the port in $dbHost != the db_port specified used the $dbPort as the db host port.
+  if ($dbPort !== '3306' && (count($dbHostParts) == 1 || count($dbHostParts) == 2 && $dbHostParts[1] !== $dbPort)) {
+    $dbHostParts[1] = $dbPort;
+  }
+  $dbHost = implode(':', $dbHostParts);
+
   $params = [];
   $params['crmRoot'] = d()->root . '/wp-content/plugins/civicrm/civicrm/';
   $params['templateCompileDir'] = d()->root . '/sites/' . d()->uri . '/wp-content/uploads/civicrm/templates_c';
@@ -192,7 +201,7 @@ function provision_wordpress_regenerate_civicrm_settings() {
   $params['baseURL'] = "https://" . d()->uri;
   $params['dbUser'] = addslashes(urlencode(drush_get_option('db_user', NULL, 'site')));
   $params['dbPass'] = addslashes(urlencode(drush_get_option('db_passwd', NULL, 'site')));
-  $params['dbHost'] = addslashes(implode(':', array_map('urlencode', explode(':', drush_get_option('db_host', NULL, 'site')))));
+  $params['dbHost'] = addslashes(implode(':', array_map('urlencode', explode(':', $dbHost))));
   $params['dbName'] = addslashes(urlencode(drush_get_option('db_name', NULL, 'site')));
   // The '&' prefix is awkward, but we don't know what's already in the file.
   // At the time of writing, it has ?new_link=true. If that is removed,
