@@ -512,12 +512,39 @@ function hosting_wpplatform_delete($node) {
  * Implements hook_validate().
  */
 function hosting_wpplatform_validate($node, &$form) {
+  if ($node->op == t('Delete')) {
+    return;
+  }
+
+  $exists = db_query("SELECT n.title AS name
+    FROM {hosting_wpplatform} AS h
+    INNER JOIN {node} AS n ON n.nid = h.nid
+    WHERE n.title = :n_title
+      AND n.nid <> :n_nid
+      AND h.status >= :h_status", [
+      ':n_title' => $node->title,
+      ':n_nid' => $node->nid,
+      ':h_status' => HOSTING_WPPLATFORM_QUEUED,
+    ])->fetch();
+
   // Make sure the wpplatform name is unique, to avoid context clashes.
-  if ($node->op != t('Delete') && $result = db_query("SELECT n.title AS name FROM {hosting_wpplatform} AS h INNER JOIN {node} AS n ON n.nid = h.nid WHERE n.title = !n.title AND n.nid <> !n.nid AND h.status >= !h.status", array('!n.title' => $node->title, '!n.nid' => $node->nid, '!h.status' => HOSTING_WPPLATFORM_QUEUED))->fetch()) {
+  if ($exists) {
     form_set_error('title', t('Platform name %name is already defined. Platform names must be unique across all servers.', array('%name' => $result->name)));
   }
+
   // Make sure the path is unique. Remote servers can't have the same path to a wpplatform that is in use by another server.
-  if ($node->op != t('Delete') && $result = db_query("SELECT n.title AS name FROM {hosting_wpplatform} AS h INNER JOIN {node} AS n ON n.nid = h.nid WHERE publish_path = !publish_path AND n.nid <> !n.nid AND h.status >= !h.status", array('!publish_path' => hosting_path_normalize($node->publish_path), '!n.nid' => $node->nid, '!h.status' => HOSTING_WPPLATFORM_QUEUED))->fetch()) {
+  $exists = db_query("SELECT n.title AS name
+    FROM {hosting_wpplatform} AS h
+    INNER JOIN {node} AS n ON n.nid = h.nid
+    WHERE publish_path = :publish_path
+      AND n.nid <> :n_nid
+      AND h.status >= :h_status", [
+      ':publish_path' => hosting_path_normalize($node->publish_path),
+      ':n_nid' => $node->nid,
+      ':h_status' => HOSTING_WPPLATFORM_QUEUED,
+    ])->fetch();
+
+  if ($exists) {
     form_set_error('publish_path', t('Path is already in use by wpplatform %name. Platform paths must be unique across all servers.', array('%name' => $result->name)));
   }
   if (is_null($node->web_server)) {
