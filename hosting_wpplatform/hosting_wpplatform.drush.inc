@@ -51,15 +51,13 @@ function hosting_wpplatform_drush_context_import($context, &$node) {
 function hosting_wpplatform_post_hosting_verify_task($task, $data) {
   $node = $task->ref;
   if ($node->type == 'wpplatform') {
-    $context = $data['context'];
-    $packages = $context['packages'];
-
     // Lock wpplatforms by default
     if ($node->verified == 0 && variable_get('hosting_lock_wpplatforms_by_default', FALSE)) {
       $node->wpplatform_status = HOSTING_WPPLATFORM_LOCKED;
     }
 
-    $node->verified = REQUEST_TIME; // set verified flag on wpplatform, to let it know it has been checked.
+    // Set verified flag on wpplatform, to let it know it has been checked.
+    $node->verified = REQUEST_TIME;
 
     /**
      * If we are verifying a Locked wpplatform (i.e if the publish_path has changed),
@@ -73,37 +71,6 @@ function hosting_wpplatform_post_hosting_verify_task($task, $data) {
     $node->no_verify = TRUE;
     // Save the wpplatform being verified
     node_save($node);
-
-/* TODO
-    hosting_package_sync($packages['base']);
-    hosting_package_sync($packages['sites-all']);
-    hosting_package_instance_sync($node->nid, $task->ref->type, $packages['base'], $packages['sites-all']);
-    foreach ($context['profiles'] as $profile) {
-      hosting_package_sync($packages['profiles'][$profile]);
-      $instance = hosting_package_instance_load(
-        array('p.short_name' => $profile, 'i.rid' => $node->nid, 'p.package_type' => 'profile'));
-      hosting_package_instance_sync($instance->iid, $instance->package_type, $packages['base'], $packages['profiles'][$profile], $packages['sites-all']);
-
-      // @todo : package instances of modules to profiles. <-- huh?
-    }
-
-    foreach ($context['sites'] as $url) {
-      if (hosting_domain_allowed($url)) {
-        // Import any sites that have not been created yet.
-        $site = new stdClass();
-        $site->type = 'site';
-        $site->site_status = HOSTING_SITE_QUEUED;
-        $site->import = TRUE;
-        $site->title = $url;
-        $site->wpplatform = $node->nid;
-        $site->client = HOSTING_DEFAULT_CLIENT;
-        $site->db_server = HOSTING_DEFAULT_DB_SERVER;
-        node_save($site);
-        drush_log(dt("Imported existing site !domain", array('!domain' => _hosting_node_link($site->nid))));
-        hosting_package_instance_sync($site->nid, $site->type, $packages['base']);
-      }
-    }
-*/
   }
 }
 
