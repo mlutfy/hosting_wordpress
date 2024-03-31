@@ -96,7 +96,7 @@ function drush_provision_backup_wordpress_get_exclusions() {
   $directories = PROVISION_BACKUP_WORDPRESS_EXCLUDED_DIRECTORIES;
   drush_command_invoke_all_ref('provision_backup_wordpress_exclusions_alter', $directories);
 
-  $exclusions = "";
+  $exclusions = " --exclude='wp-content/wflogs'";
   foreach ($directories as $directory) {
     $exclusions .= " --exclude='$directory'";
   }

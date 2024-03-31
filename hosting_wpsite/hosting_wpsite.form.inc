@@ -362,7 +362,7 @@ function hosting_wpsite_validate($node, &$form) {
 
   // Support for hosting_alias
   // The data gets saved in hosting_wpsite_insert().
-  if (function_exists('hosting_alias_validate_alias')) {
+  if (function_exists('hosting_alias_validate_alias') && !empty($form_state['values']['aliases'])) {
     $aliases = $form_state['values']['aliases'] = array_filter($form_state['values']['aliases']);
     foreach ($aliases as $key => $alias) {
       hosting_alias_validate_alias($form_state['node'], $alias, $key);
