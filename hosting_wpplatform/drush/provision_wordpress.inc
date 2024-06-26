@@ -117,10 +117,9 @@ function provision_wordpress_update_domainstxt() {
   // we want to slowly move further torwards Ansible.
 
   // Get the Aegir frontend URL (@todo move to a function)
-  // @todo This makes many assumptions
-  global $aliases;
-  require_once '/var/aegir/.drush/hostmaster.alias.drushrc.php';
-  $frontend = 'https://' . $aliases['hostmaster']['uri'] . '/inventory';
+  // @todo assumes https
+  $hostmaster = provision_sitealias_get_record('@hostmaster');
+  $frontend = 'https://' . $hostmaster['uri'] . '/inventory';
 
   $data = file_get_contents($frontend);
   $data = json_decode($data, true);
@@ -185,7 +184,8 @@ function provision_wordpress_regenerate_civicrm_settings() {
   }
 
   // Regenerate the civicrm.settings.php
-  _provision_civicrm_run_cv_command('php:script ' . dirname(__DIR__) . '/cv/regenerate-settings.php');
+  $hostmaster = provision_sitealias_get_record('@hostmaster');
+  _provision_civicrm_run_cv_command('php:script ' . $hostmaster['root'] . '/profiles/hostmaster/modules/aegir/hosting_civicrm/cv/regenerate-settings.php');
 }
 
 /**
