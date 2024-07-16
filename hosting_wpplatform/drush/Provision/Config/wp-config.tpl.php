@@ -50,6 +50,13 @@ if (php_sapi_name() == "cli") {
   }
 }
 
+/**
+ * Added by Symbiotic: support for the fail2ban plugin
+ */
+if (defined(WP_FAIL2BAN_ACTIVATE) && WP_FAIL2BAN_ACTIVATE) {
+  include '<?php print d()->root; ?>/wp-content/wp-fail2ban-config.php';
+}
+
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
 define('DB_NAME', $_SERVER['db_name']);
