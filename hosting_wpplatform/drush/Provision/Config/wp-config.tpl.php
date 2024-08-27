@@ -83,6 +83,11 @@ define('DB_COLLATE', '');
 /** Required by CiviCRM extensions */
 define('CIVICRM_CMSDIR', '<?php print $this->root; ?>');
 
+/** Keep max 3 revisions for wp_posts - can be overridden in the wp-config.php of the site */
+if (!defined('WP_POST_REVISIONS')) {
+  define('WP_POST_REVISIONS', 3);
+}
+
 /** Load Aegir global settings */
 if (file_exists('/var/aegir/config/includes/global.inc')) {
   require_once '/var/aegir/config/includes/global.inc';
