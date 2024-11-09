@@ -88,6 +88,11 @@ if (!defined('WP_POST_REVISIONS')) {
   define('WP_POST_REVISIONS', 3);
 }
 
+/** coopsymbiotic/ops#441 Disable the lazy WP cron. We use systemd timers */
+if (!defined('DISABLE_WP_CRON')) {
+  define('DISABLE_WP_CRON', true);
+}
+
 /** Load Aegir global settings */
 if (file_exists('/var/aegir/config/includes/global.inc')) {
   require_once '/var/aegir/config/includes/global.inc';
