@@ -88,13 +88,6 @@ function hosting_wpsite_available_options($node, $platform = NULL) {
   $return['platform'] = array();
   $return['wpsite_language'] = array();
 
-  if (!hosting_feature('client')) {
-    // Setting the return value of a text field to null,
-    // will signal to the front end that the field needs to
-    // be displayed, but is not editable.
-    $return['client'] = NULL;
-  }
-
   // Load up the user we'll use to check platform and profile access
   $user = user_load($GLOBALS['user']->uid);
 
@@ -220,18 +213,6 @@ function hosting_wpsite_form($node, &$form_state) {
   ));
 
   $editable = ((!isset($node->client) || !isset($node->nid)) || user_access('administer wpsites')) && hosting_feature('client');
-  $add_client_text = '';
-  if (user_access('administer clients') || user_access('create client')) {
-    $add_client_text = t(' Click !here to add a new client.', array('!here' => l('here', 'node/add/client', array('attributes' => array('target' => '_blank')))));
-  }
-  _hosting_wpsite_field($form, $node, 'client', array(
-    '#type' => 'textfield',
-    '#required' => TRUE,
-    '#title' => t('Client'),
-    '#default_value' => _hosting_client_site_default($node),
-    '#description' => t('The client to whom this wpsite belongs.') . $add_client_text,
-    '#autocomplete_path' => 'hosting_client/autocomplete/client',
-  ), 'filter_xss', $editable);
 
   // NB: in hosting_site, this calls hosting_get_profile_platforms($selected_profile);
   // but we do not have profiles for wp platforms.
@@ -322,17 +303,6 @@ function hosting_wpsite_validate($node, &$form) {
   if ($length > HOSTING_MAX_ALIAS_LENGTH) {
     $long = $length - HOSTING_MAX_ALIAS_LENGTH;
     form_set_error("title", t('The url your provided is @long character(s) too long. Please shorten.', array('@long' => $long)));
-  }
-
-  if (isset($node->new_client) && !$node->new_client) {
-    $client = hosting_get_client($node->client);
-    if (!$node->client || !$client) {
-      form_set_error('client', t('Please fill in a valid client'));
-    }
-    if (!user_access('administer clients') && !array_key_exists($client->nid, hosting_get_client_from_user($user->uid))) {
-      form_set_error('client', t('Access denied to client @client', array('@client' => $client->title)));
-    }
-    $node->client = $client->nid;
   }
 
   // TODO: maybe we should allow creation of wpsites that conflict with HOSTING_SITE_DISABLED (which would then need to be renamed before being re-enabled)

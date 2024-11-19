@@ -392,10 +392,6 @@ function hosting_wpsite_permission() {
  * Implements hook_node_access().
  */
 function hosting_wpsite_node_access($node, $op, $account) {
-  if ($op != 'create' && hosting_feature('client')) {
-    // we rely on hosting_client_node_grants() instead of global configuration
-    return NULL; //@todo check this return value -> NODE_ACCESS_IGNORE?
-  }
   if ($op == 'create' && user_access('create WP site', $account)) {
     return NODE_ACCESS_ALLOW;
   }
@@ -684,11 +680,6 @@ function hosting_get_wpsite_by_url($url) {
  */
 function hosting_import_wpsite($site_id, $data, $wpplatform) {
   global $user;
-  $client = node_load(HOSTING_DEFAULT_CLIENT);
-
-  if ($data['client_name']) {
-    $client = hosting_import_client($data['client_name']);
-  }
 
   $site = node_load($site_id);
   $site->nid = $site_id;
@@ -698,9 +689,8 @@ function hosting_import_wpsite($site_id, $data, $wpplatform) {
   $site->wpplatform = $wpplatform;
   $site->no_verify = TRUE;
   $site->verified = REQUEST_TIME;
-  $site->client = $client->nid ? $client->nid : HOSTING_DEFAULT_CLIENT;
+  $site->client = 1; // deprecated
   $site->cron_key = ($data['cron_key']) ? $data['cron_key'] : '';
-
   $site->aliases = ($data['aliases']) ? $data['aliases'] : array();
   $site->db_server = ($site->db_server) ? $site->db_server : HOSTING_DEFAULT_DB_SERVER;
   $site->site_language = $data['language'] ? $data['language'] : 'en';

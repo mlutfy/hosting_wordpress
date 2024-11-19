@@ -138,28 +138,6 @@ function hosting_wpplatform_permission() {
 }
 
 /**
- * Implements hook_node_access().
- * @todo: switch to node access constants
- */
-function hosting_wpplatform_node_access($node, $op, $account) {
-  if ($op != 'create' && hosting_feature('client')) {
-    // We rely on hosting_client_node_grants() instead of global configuration.
-    return NULL;
-  }
-
-  switch ($op) {
-    case 'create':
-      return user_access('create wpplatform', $account);
-
-    case 'update':
-      return user_access('edit wpplatform', $account);
-
-    case 'view':
-      return user_access('view wpplatform', $account);
-  }
-}
-
-/**
  * Callback for wpplatform verify action.
  *
  * @see: hosting_task_action_info().
@@ -585,16 +563,6 @@ function hosting_wpplatform_load($nodes) {
 
     $additions->release = hosting_package_instance_load($iid);
     $additions->profiles = hosting_get_profiles($node->nid, 'short_name');
-
-/* TODO
-    if (hosting_feature('client')) {
-      $result = db_query("SELECT cid FROM {hosting_wpplatform_client_access} WHERE pid = :pid", array(':pid' => $node->nid));
-
-      foreach ($result as $record) {
-        $additions->clients[$record->cid] = $record->cid;
-      }
-    }
-*/
 
     foreach ($additions as $property => &$value) {
       $node->$property = $value;
