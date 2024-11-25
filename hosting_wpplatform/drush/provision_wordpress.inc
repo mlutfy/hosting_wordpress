@@ -185,7 +185,24 @@ function provision_wordpress_regenerate_civicrm_settings() {
 
   // Regenerate the civicrm.settings.php
   $hostmaster = provision_sitealias_get_record('@hostmaster');
-  _provision_civicrm_run_cv_command('php:script ' . $hostmaster['root'] . '/profiles/hostmaster/modules/aegir/hosting_civicrm/cv/regenerate-settings.php');
+
+  $args = [
+    '--host=' . escapeshellarg(d()->uri),
+    '--civicrm_root=' . d()->root . '/wp-content/plugins/civicrm/civicrm',
+    '--cms=WordPress',
+  ];
+
+  // Settings that can be set in the Aegir frontend (todo: CredKey)
+  if (d()->civicrm_sitekey) {
+    drush_log('CiviCRM: found a site key from the front-end.', 'ok');
+    drush_set_option('civicrm_sitekey', d()->civicrm_sitekey);
+    $args[] = '--site_key=' . escapeshellarg(d()->civicrm_sitekey);
+  }
+  else {
+    drush_log('CiviCRM: no site key found from the front-end.');
+  }
+
+  provision_exec('cd ' . escapeshellarg(d()->site_path) . ' && php ' . $hostmaster['root'] . '/profiles/hostmaster/modules/aegir/hosting_civicrm/cv/regenerate-settings.php ' . implode(' ', $args));
 }
 
 /**

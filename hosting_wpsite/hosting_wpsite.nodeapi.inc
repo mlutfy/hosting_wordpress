@@ -36,15 +36,6 @@ function hosting_wpsite_view(&$node, $teaser = FALSE) {
     );
   }
 
-  if (is_numeric($node->client)) {
-    $node->content['info']['client'] = array(
-      '#type' => 'item',
-      '#title' => t('Client'),
-      '#markup' => _hosting_node_link($node->client),
-      '#weight' => 5,
-    );
-  }
-
   $node->content['info']['verified'] = array(
     '#type' => 'item',
     '#title' => t('Verified'),
@@ -156,8 +147,6 @@ function hosting_wpsite_insert(&$node) {
     return;
   }
 
-  $client = hosting_get_client($node->client);
-  $node->client = $client->nid;
   $node->wpsite_language = isset($node->wpsite_language) ? $node->wpsite_language : 'en';
   // If the cron_key is set use it, otherwise generate a new one.
   $node->cron_key = isset($node->cron_key) ? $node->cron_key : '';
@@ -168,7 +157,6 @@ function hosting_wpsite_insert(&$node) {
     ->fields(array(
       'vid' => $node->vid,
       'nid' => $node->nid,
-      'client' => $node->client,
       'db_server' => $node->db_server,
       'db_name' => isset($node->db_name) ? $node->db_name : '',
       'wpplatform' => $node->wpplatform,
@@ -212,15 +200,12 @@ function hosting_wpsite_update(&$node) {
     hosting_wpsite_insert($node);
   }
   else {
-    $client = hosting_get_client($node->client);
-    $node->client = $client->nid;
     if ($node->wpsite_status == HOSTING_SITE_DELETED) {
       $node->no_verify = TRUE;
     }
 
     db_update('hosting_wpsite')
       ->fields(array(
-        'client' => $node->client,
         'db_server' => $node->db_server,
         'db_name' => $node->db_name,
         'wpplatform' => $node->wpplatform,
@@ -257,7 +242,7 @@ function hosting_wpsite_node_update($node) {
 function hosting_wpsite_load($nodes) {
   foreach ($nodes as $nid => &$node) {
     if ($node->type == 'wpsite') {
-      $additions = db_query('SELECT  client, db_server, db_name, wpplatform, language as wpsite_language, last_cron, cron_key, status AS wpsite_status, verified FROM {hosting_wpsite} WHERE vid = :vid', array(':vid' => $node->vid))->fetch();
+      $additions = db_query('SELECT db_server, db_name, wpplatform, language as wpsite_language, last_cron, cron_key, status AS wpsite_status, verified FROM {hosting_wpsite} WHERE vid = :vid', array(':vid' => $node->vid))->fetch();
       foreach ($additions as $property => &$value) {
         $node->$property = $value;
       }

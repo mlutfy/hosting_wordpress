@@ -20,17 +20,6 @@ function hosting_wpsite_views_data() {
     ),
   );
 
-  $data['hosting_wpsite']['client'] = array(
-   'title' => t('Client'),
-   'help' => t('Relate a node revision to the user who created the revision.'),
-   'relationship' => array(
-      'handler' => 'views_handler_relationship',
-      'base' => 'node',
-      'base field' => 'nid',
-      'label' => t('client'),
-    ),
-  );
-
   $data['hosting_wpsite']['db_server'] = array(
    'title' => t('Database Server'),
    'help' => t('Database where the site is installed.'),
@@ -257,7 +246,7 @@ function hosting_wpsite_views_pre_build(&$view) {
         // contextual filters (arguments) here.
         // @see: hosting_wpsite_block_view_alter().
         if($node = menu_get_object()) {
-          if (in_array($node->type, array('wpplatform', 'server', 'client'))) {
+          if (in_array($node->type, array('wpplatform', 'server'))) {
             foreach ($view->argument as $name => $arg) {
               if (!in_array($node->type, $arg->options['validate_options']['types'])) {
                 unset($view->argument[$name]);
