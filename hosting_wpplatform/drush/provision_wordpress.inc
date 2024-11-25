@@ -188,7 +188,7 @@ function provision_wordpress_regenerate_civicrm_settings() {
 
   $args = [
     '--host=' . escapeshellarg(d()->uri),
-    '--civicrm_root=' . d()->root . '/wp-content/plugins/civicrm/civicrm',
+    '--civicrm_root=' . d()->root . '/wp-content/plugins/civicrm/civicrm/',
     '--cms=WordPress',
   ];
 
