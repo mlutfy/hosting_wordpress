@@ -187,7 +187,7 @@ function provision_wordpress_regenerate_civicrm_settings() {
   $hostmaster = provision_sitealias_get_record('@hostmaster');
 
   $args = [
-    '--host=' . escapeshellarg(d()->uri),
+    '--host=https://' . escapeshellarg(d()->uri),
     '--civicrm_root=' . d()->root . '/wp-content/plugins/civicrm/civicrm/',
     '--cms=WordPress',
   ];
